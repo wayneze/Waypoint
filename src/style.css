@@ -1,0 +1,951 @@
+@import "tailwindcss";
+/* 西文字体随包打包，离线一致；中文走系统字体，避免几十 MB 的 CJK 字库。 */
+@import "@fontsource-variable/fraunces/opsz.css";
+@import "@fontsource-variable/source-sans-3/wght.css";
+@import "@fontsource-variable/source-sans-3/wght-italic.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+@theme {
+  --font-sans: "Source Sans 3 Variable", "Microsoft YaHei", "PingFang SC", sans-serif;
+  --font-display: "Fraunces Variable", "SimSun", "Songti SC", serif;
+  --font-mono: "IBM Plex Mono", "Cascadia Code", ui-monospace, monospace;
+
+  --color-canvas: #191b19;
+  --color-chrome: #141614;
+  --color-paper: #232622;
+  --color-raised: #2b2f29;
+  --color-hairline: #3b4037;
+  --color-ink: #eceae3;
+  --color-muted: #bfc2b8;
+  --color-faint: #9ba193;
+  --color-beacon: #d3b781;
+  --color-done: #aac58f;
+  --color-alert: #e59883;
+  --color-stamp-jx3: #d59b84;
+  --color-stamp-sky: #97bdd2;
+  --color-stamp-nsh: #a0bbaa;
+  --color-stamp-gal: #c9a0b6;
+  --color-win-close: #c45c4a;
+
+  /* 旧 utility 色号引用同一套语义主题，避免并行维护两份配色。 */
+  --color-zinc-50: var(--color-ink);
+  --color-zinc-100: var(--color-ink);
+  --color-zinc-200: var(--color-ink);
+  --color-zinc-300: var(--color-muted);
+  --color-zinc-400: var(--color-muted);
+  --color-zinc-500: var(--color-faint);
+  --color-zinc-600: var(--color-faint);
+  --color-zinc-700: var(--color-hairline);
+  --color-zinc-800: var(--color-raised);
+  --color-zinc-900: var(--color-paper);
+  --color-zinc-950: var(--color-canvas);
+
+  --color-slate-50: var(--color-ink);
+  --color-slate-100: var(--color-ink);
+  --color-slate-200: var(--color-ink);
+  --color-slate-300: var(--color-muted);
+  --color-slate-400: var(--color-muted);
+  --color-slate-500: var(--color-faint);
+  --color-slate-600: var(--color-faint);
+  --color-slate-700: var(--color-hairline);
+  --color-slate-800: var(--color-raised);
+  --color-slate-900: var(--color-paper);
+  --color-slate-950: var(--color-canvas);
+
+  --color-stone-400: var(--color-muted);
+  --color-stone-500: var(--color-faint);
+
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
+  --radius-2xl: 10px;
+}
+
+html, body, #app {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: 400;
+  user-select: none;
+  -webkit-user-select: none;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+input, textarea, [contenteditable="true"], .select-text, pre, code {
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+input[type="checkbox"]:not([role="switch"]) {
+  appearance: none;
+  display: inline-grid;
+  place-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  vertical-align: middle;
+  border: 1px solid var(--color-faint);
+  border-radius: 3px;
+  background: var(--color-chrome);
+  color: var(--color-canvas);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+input[type="checkbox"]:not([role="switch"])::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+  clip-path: polygon(10% 45%, 38% 70%, 90% 15%, 100% 28%, 40% 92%, 0 57%);
+  transform: scale(0);
+}
+input[type="checkbox"]:not([role="switch"]):is(:checked, :indeterminate) {
+  border-color: var(--color-beacon);
+  background: var(--color-beacon);
+}
+input[type="checkbox"]:not([role="switch"]):is(:checked, :indeterminate)::before { transform: scale(1); }
+input[type="checkbox"]:not([role="switch"]):indeterminate::before {
+  clip-path: none;
+  height: 2px;
+  border-radius: 1px;
+}
+input[type="checkbox"]:not([role="switch"]):hover:not(:disabled) { border-color: var(--color-beacon); }
+input[type="checkbox"]:not([role="switch"]):focus-visible {
+  outline: 2px solid var(--color-beacon);
+  outline-offset: 3px;
+}
+input[type="checkbox"]:not([role="switch"]):disabled { opacity: .4; cursor: not-allowed; }
+@media (forced-colors: active) {
+  input[type="checkbox"]:not([role="switch"]) { appearance: auto; }
+  input[type="checkbox"]:not([role="switch"])::before { display: none; }
+}
+
+img, a, svg {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
+[data-tauri-drag-region] {
+  -webkit-app-region: drag;
+}
+
+button, input, select, textarea, [data-tauri-no-drag] {
+  -webkit-app-region: no-drag;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-faint) 45%, transparent);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--color-beacon) 55%, transparent);
+}
+
+.wp-grain {
+  background-color: var(--color-canvas);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.42  0 0 0 0 0.28  0 0 0 0.10 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 140px 140px;
+  background-blend-mode: overlay;
+}
+
+.wp-paper {
+  background: var(--color-paper);
+  border: 1px solid var(--color-hairline);
+  border-radius: 8px;
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-ink) 4%, transparent) inset;
+}
+
+.wp-chrome {
+  background: var(--color-chrome);
+  border-color: var(--color-hairline);
+}
+
+/* 窗口外壳与今日工作台共用一套表面、字色和状态色。 */
+.wp-shell { --sidebar-width: 222px; }
+.wp-shell.is-sidebar-collapsed { --sidebar-width: 68px; }
+.wp-titlebar {
+  height: 46px;
+  border-bottom: 1px solid var(--color-hairline);
+  background: var(--color-chrome);
+}
+.wp-titlebar-brand { width: var(--sidebar-width); height: 100%; flex-shrink: 0; display: flex; align-items: center; gap: 9px; padding-inline: 20px; transition: width 180ms ease; }
+.wp-titlebar-brand img { width: 24px; height: 24px; flex-shrink: 0; }
+.wp-titlebar-wordmark { font-family: var(--font-display); font-size: 19px; font-weight: 500; line-height: 1; letter-spacing: -.5px; }
+.wp-titlebar-wordmark > span { color: var(--color-beacon); }
+.wp-titlebar-context { min-width: 0; flex: 1; height: 100%; display: flex; align-items: center; gap: 12px; padding-inline: 24px; border-left: 1px solid var(--color-hairline); }
+.wp-titlebar-section { color: var(--color-faint); font-size: 10px; letter-spacing: .06em; flex-shrink: 0; }
+.wp-titlebar-slash { font-size: 12px; color: var(--color-hairline); }
+.wp-titlebar-location { min-width: 0; display: flex; align-items: center; gap: 7px; color: var(--color-muted); font-size: 12px; }
+.wp-titlebar-location > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wp-titlebar-location > .inline-flex { width: 14px; height: 14px; }
+.wp-titlebar-location[data-tone="jx3"] > .inline-flex { color: var(--color-stamp-jx3); }
+.wp-titlebar-location[data-tone="sky"] > .inline-flex { color: var(--color-stamp-sky); }
+.wp-titlebar-location[data-tone="gal"] > .inline-flex { color: var(--color-stamp-gal); }
+.wp-titlebar-actions { height: 100%; display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.wp-titlebar-pin { display: flex; align-items: center; justify-content: center; gap: 6px; min-width: 66px; height: 28px; padding: 0 9px; border-radius: 4px; color: var(--color-faint); font-size: 11px; cursor: pointer; }
+.wp-titlebar-pin:hover { color: var(--color-ink); background: var(--color-paper); }
+.wp-titlebar-pin[aria-pressed="true"] { color: var(--color-beacon); background: color-mix(in srgb, var(--color-beacon) 10%, transparent); }
+.wp-titlebar-pin svg { width: 13px; height: 13px; }
+.wp-titlebar-pin svg.is-pinned { transform: rotate(35deg); fill: currentColor; }
+.wp-window-controls { display: flex; align-items: center; height: 100%; }
+.wp-window-button { width: 40px; height: 100%; display: grid; place-items: center; color: var(--color-faint); cursor: pointer; }
+.wp-window-button:hover { color: var(--color-ink); background: var(--color-raised); }
+.wp-window-button.is-close:hover { background: var(--color-win-close); color: #fff; }
+.wp-workspace-main { padding: 22px clamp(16px, 3vw, 44px) 0; overflow: hidden; }
+.wp-workspace-main:has(.library-detail) { padding: 0; }
+.wp-game-workspace { height: 100%; min-height: 0; max-width: 1440px; margin-inline: auto; display: flex; flex-direction: column; container-type: inline-size; }
+.wp-game-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding-bottom: 22px; flex-shrink: 0; }
+.wp-game-identity { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.wp-game-emblem { display: grid; place-items: center; width: 34px; height: 46px; flex-shrink: 0; color: var(--game-color); }
+.wp-game-heading h1 { font-size: 30px; line-height: 1.3; letter-spacing: .08em; font-weight: 600; }
+.wp-game-workspace[data-game="jx3"] .wp-game-heading h1 { font-family: var(--font-display); }
+.wp-game-heading p { margin-top: 5px; color: var(--color-muted); font-size: 12px; }
+.wp-game-summary { text-align: right; flex-shrink: 0; display: grid; gap: 4px; }
+.wp-game-summary-label { font-size: 12px; color: var(--color-faint); }
+.wp-game-summary-value { font-size: 26px; font-family: var(--font-mono); line-height: 1.2; }
+.wp-game-summary-value small { font-size: 12px; color: var(--color-faint); }
+.wp-game-tabs { display: flex; gap: 4px; flex-shrink: 0; overflow-x: auto; padding: 3px 2px 0; border-bottom: 1px solid var(--color-hairline); }
+.wp-game-tabs button { display: inline-flex; gap: 7px; align-items: center; flex-shrink: 0; padding: 10px 13px; border-bottom: 2px solid transparent; color: var(--color-muted); font-size: 13px; cursor: pointer; }
+.wp-game-tabs button:hover { color: var(--color-ink); background: var(--color-paper); }
+.wp-game-tabs button[aria-current="page"] { color: var(--game-color); border-color: var(--game-color); background: linear-gradient(transparent, color-mix(in srgb, var(--game-color) 7%, transparent)); }
+.wp-game-tab-count { font-size: 11px; font-family: var(--font-mono); color: var(--color-faint); }
+.wp-game-tab-notice { width: 5px; height: 5px; border-radius: 50%; background: var(--color-alert); }
+.wp-game-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0; flex-shrink: 0; }
+.wp-game-context { font-size: 12px; color: var(--color-faint); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wp-context-owner { color: var(--game-color); margin-right: 12px; }
+.wp-game-tools { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.wp-game-action { min-height: 32px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 10px; border: 1px solid var(--color-hairline); border-radius: 5px; color: var(--color-muted); font-size: 12px; cursor: pointer; }
+.wp-game-action:hover { color: var(--color-ink); background: var(--color-raised); }
+.wp-game-action.is-primary { color: var(--game-color); background: color-mix(in srgb, var(--game-color) 9%, transparent); border-color: color-mix(in srgb, var(--game-color) 35%, transparent); }
+.wp-game-action:disabled, .wp-game-more-menu button:disabled { opacity: .5; cursor: default; }
+.wp-game-more { position: relative; z-index: 30; }
+.wp-game-more summary { list-style: none; }
+.wp-game-more summary::-webkit-details-marker { display: none; }
+.wp-game-more-menu { position: absolute; right: 0; top: calc(100% + 6px); width: 208px; padding: 6px; border: 1px solid var(--color-hairline); border-radius: 8px; background: var(--color-paper); box-shadow: 0 12px 32px #0006; display: grid; gap: 3px; }
+.wp-game-more-menu button { min-height: 36px; border-radius: 4px; padding: 7px 10px; text-align: left; font-size: 13px; color: var(--color-muted); cursor: pointer; }
+.wp-game-more-menu button:hover { background: var(--color-raised); color: var(--color-ink); }
+.wp-game-content { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior-y: contain; scrollbar-gutter: stable; padding: 0 8px 28px 2px; }
+.wp-game-content > :not([style*="display: none"]) { margin-bottom: 12px; }
+.wp-panel-filters { position: sticky; top: 0; z-index: 12; padding: 10px 0; background: var(--color-canvas); border-bottom: 1px solid var(--color-hairline); }
+.wp-game-workspace :is(button, summary, input, select):focus-visible { outline: 2px solid var(--game-color); outline-offset: 2px; }
+.wp-game-content:focus-visible { outline: 1px solid var(--game-color); outline-offset: -1px; }
+.wp-schedule-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); gap: 0 28px; }
+.wp-schedule-entry { padding: 14px 0; border-top: 1px solid var(--color-hairline); display: flex; flex-direction: column; gap: 8px; }
+.wp-schedule-entry > div:first-child { flex-wrap: wrap; }
+.wp-schedule-entry > div:first-child > span { font-family: var(--font-mono); font-size: 13px; }
+.wp-schedule-entry.is-active { border-color: var(--color-alert); }
+.wp-schedule-entry.is-upcoming { border-color: var(--color-beacon); }
+.wp-task-list { border-top: 1px solid var(--color-hairline); }
+.wp-game-task { display: flex; align-items: center; gap: 12px; padding: 13px 4px; border-bottom: 1px solid var(--color-hairline); transition: background-color 160ms; }
+.wp-game-task:hover { background: var(--color-raised); }
+.wp-game-task.is-done { color: var(--color-faint); }
+.wp-game-task.is-active { background: color-mix(in srgb, var(--color-alert) 6%, var(--color-paper)); }
+.wp-catalog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 270px), 1fr)); gap: 14px; }
+.wp-catalog-grid.is-compact { grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr)); }
+.wp-calendar-entry { border-top: 1px solid var(--color-hairline); }
+.wp-calendar-heading { width: 100%; text-align: left; display: flex; align-items: flex-start; gap: 20px; padding: 24px 0; cursor: pointer; }
+.wp-calendar-heading:hover h3 { color: var(--game-color); }
+.wp-calendar-heading > img { width: 128px; height: 132px; object-fit: contain; border-radius: 0; background: none; }
+.wp-calendar-entry h3 { font-size: 22px; font-weight: 500; margin-block: 8px; }
+.wp-calendar-kind { font-size: 11px; letter-spacing: .1em; color: var(--game-color); }
+.wp-calendar-date { display: grid; gap: 6px; flex: 0 0 94px; padding-top: 3px; font-family: var(--font-mono); font-size: 12px; color: var(--color-muted); }
+.wp-calendar-date small { font-family: var(--font-sans); font-size: 12px; color: var(--game-color); }
+.wp-quest-list { border-top: 1px solid var(--color-hairline); }
+.wp-quest-row { display: grid; gap: 8px 20px; border-bottom: 1px solid var(--color-hairline); padding: 18px 0; align-items: start; }
+.wp-quest-row.has-image { grid-template-columns: minmax(0, 1fr) 150px; }
+.wp-quest-row > .wp-quest-image { grid-column: 2; grid-row: 1 / 3; }
+.wp-quest-row > p { grid-column: 1; }
+.wp-quest-image { position: relative; width: 100%; overflow: hidden; cursor: zoom-in; }
+.wp-record { padding: 18px 0; border-top: 1px solid var(--color-hairline); display: flex; flex-direction: column; gap: 10px; }
+.wp-picture-note { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.wp-picture-note > div:last-child { padding-inline: 0; }
+.wp-spirit-entry { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 18px; padding: 22px 0; border-top: 1px solid var(--color-hairline); }
+.wp-spirit-portrait { width: 76px; height: 100px; object-fit: contain; flex-shrink: 0; }
+.wp-spirit-description { flex: 1 1 210px; min-width: 0; }
+.wp-spirit-progress { flex: 1 1 230px; display: grid; gap: 4px; }
+.wp-progress-toggle { display: flex; align-items: center; gap: 9px; width: 100%; padding: 8px 0; font-size: 12px; text-align: left; cursor: pointer; }
+.wp-progress-toggle > span:last-child { margin-left: auto; }
+.wp-progress-check { display: grid; place-items: center; width: 17px; height: 17px; border: 1px solid var(--color-faint); border-radius: 2px; flex-shrink: 0; }
+.wp-progress-toggle[aria-pressed="true"] .wp-progress-check { border-color: var(--color-done); color: var(--color-done); }
+@container (max-width: 600px) {
+  .wp-game-heading { gap: 12px; padding-bottom: 14px; }
+  .wp-game-emblem { width: 38px; height: 44px; }
+  .wp-game-identity { gap: 10px; }
+  .wp-game-heading h1 { font-size: 26px; }
+  .wp-game-heading p { max-width: 220px; }
+  .wp-game-tabs button { padding: 9px 11px; }
+  .wp-game-tab-count { display: none; }
+  .wp-game-toolbar { flex-wrap: wrap; gap: 6px; padding: 8px 0; }
+  .wp-game-context { flex: 1 1 120px; }
+  .wp-calendar-heading { flex-wrap: wrap; gap: 12px; }
+  .wp-calendar-date { flex: 1 1 100%; display: flex; justify-content: space-between; }
+  .wp-calendar-heading > img { width: 88px; height: 106px; }
+  .wp-quest-row.has-image { grid-template-columns: minmax(0, 1fr) 105px; gap: 9px 12px; }
+}
+.wp-text-action { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; min-width: 32px; border-radius: 5px; padding: 4px 8px; color: var(--color-muted); font-size: 12px; cursor: pointer; }
+.wp-text-action:hover { color: var(--color-ink); background: var(--color-raised); }
+[data-game="jx3"] { --game-color: var(--color-stamp-jx3); }
+[data-game="sky"] { --game-color: var(--color-stamp-sky); }
+[data-game="nsh"] { --game-color: var(--color-stamp-nsh); }
+[data-game="gal"] { --game-color: var(--color-stamp-gal); }
+.wp-titlebar button:focus-visible { outline: 2px solid var(--color-beacon); outline-offset: 3px; }
+@media (max-height: 600px) {
+  .wp-workspace-main { padding-top: 12px; }
+  .wp-game-heading { padding-bottom: 10px; }
+  .wp-game-emblem { width: 34px; height: 38px; border-radius: 7px; }
+  .wp-game-heading h1 { font-size: 24px; }
+  .wp-game-heading p { display: none; }
+  .wp-game-summary { display: flex; align-items: baseline; gap: 8px; }
+  .wp-game-summary-value { font-size: 20px; }
+  .wp-game-toolbar { padding: 7px 0; }
+}
+.wp-sidebar {
+  position: relative; width: var(--sidebar-width); min-width: 0; flex-shrink: 0; height: 100%; display: flex; flex-direction: column;
+  background: var(--color-chrome); padding: 16px 12px 10px;
+  transition: width 180ms ease; user-select: none;
+}
+.wp-sidebar-edge { position: absolute; z-index: 30; top: 0; bottom: 0; right: -6px; width: 12px; cursor: pointer; border: 0; padding: 0; background: transparent; touch-action: manipulation; }
+.wp-sidebar-edge::before { content: ""; position: absolute; left: 5px; top: 0; bottom: 0; width: 1px; background: var(--color-hairline); transition: background-color 160ms ease; }
+.wp-sidebar-edge > span { position: absolute; left: 5px; top: calc(50% - 16px); width: 2px; height: 32px; border-radius: 2px; background: var(--color-faint); opacity: .45; transition: opacity 160ms ease, height 160ms ease; }
+.wp-sidebar-edge:hover::before, .wp-sidebar-edge:focus-visible::before { width: 2px; background: var(--color-beacon); }
+.wp-sidebar-edge:hover > span, .wp-sidebar-edge:focus-visible > span { opacity: 1; background: var(--color-beacon); }
+.wp-sidebar .wp-sidebar-edge:focus-visible { outline: none; background: color-mix(in srgb, var(--color-beacon) 9%, transparent); }
+.wp-sidebar-identity { padding: 4px 0 20px; border-bottom: 1px solid var(--color-hairline); }
+.wp-character-switch { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 54px; padding: 6px 7px; text-align: left; border-radius: 6px; cursor: pointer; }
+.wp-character-switch:hover, .wp-character-switch[aria-expanded="true"] { background: var(--color-paper); }
+.wp-character-copy { min-width: 0; flex: 1; display: grid; gap: 4px; }
+.wp-character-name { font-size: 15px; font-weight: 600; color: var(--color-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wp-character-world { font-size: 11px; color: var(--color-faint); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wp-character-chevron { width: 13px; height: 13px; flex-shrink: 0; color: var(--color-faint); transition: transform 160ms ease; }
+.wp-character-chevron.is-open { transform: rotate(180deg); }
+.wp-character-empty { width: 36px; height: 36px; flex-shrink: 0; display: grid; place-items: center; border: 1px dashed var(--color-hairline); color: var(--color-beacon); border-radius: 6px; }
+.wp-character-empty svg { width: 18px; height: 18px; }
+.wp-sidebar-navigation { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 23px; padding-top: 19px; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--color-hairline) transparent; }
+.wp-nav-section { flex-shrink: 0; display: grid; gap: 4px; }
+.wp-nav-section.is-tools { margin-top: auto; border-top: 1px solid var(--color-hairline); padding-top: 12px; }
+.wp-nav-section-label { padding: 0 10px 6px; font-size: 10px; color: var(--color-faint); letter-spacing: .12em; }
+.wp-nav { --nav-accent: var(--color-beacon); position: relative; width: 100%; min-height: 46px; padding: 6px 10px; display: flex; align-items: center; gap: 11px; text-align: left; border-radius: 5px; color: var(--color-muted); cursor: pointer; transition: background-color 160ms ease, color 160ms ease; }
+.wp-nav[data-tone="jx3"] { --nav-accent: var(--color-stamp-jx3); }
+.wp-nav[data-tone="sky"] { --nav-accent: var(--color-stamp-sky); }
+.wp-nav[data-tone="gal"] { --nav-accent: var(--color-stamp-gal); }
+.wp-nav[data-tone="nsh"] { --nav-accent: var(--color-stamp-nsh); }
+.wp-nav:hover { color: var(--color-ink); background: var(--color-paper); }
+.wp-nav.is-active { color: var(--color-ink); background: color-mix(in srgb, var(--nav-accent) 9%, var(--color-chrome)); }
+.wp-nav.is-active::before { content: ""; position: absolute; left: 0; top: 12px; bottom: 12px; width: 2px; background: var(--nav-accent); }
+.wp-nav-icon { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; color: var(--color-faint); }
+.wp-nav-icon > * { width: 19px; height: 19px; }
+.wp-nav[data-tone] .wp-nav-icon, .wp-nav.is-active .wp-nav-icon { color: var(--nav-accent); }
+.wp-nav-label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.wp-nav.is-active .wp-nav-label { font-weight: 600; }
+.wp-nav-count { font-family: var(--font-mono); font-size: 11px; font-variant-numeric: tabular-nums; color: var(--color-faint); flex-shrink: 0; }
+.wp-nav-count.is-clear { color: var(--color-done); }
+.wp-nav-current { width: 12px; height: 12px; color: var(--nav-accent); flex-shrink: 0; }
+.wp-nav-section.is-tools .wp-nav { min-height: 38px; }
+.wp-sidebar.is-collapsed { padding-left: 8px; padding-right: 8px; }
+.wp-sidebar.is-collapsed .wp-character-switch { justify-content: center; padding: 6px 0; }
+.wp-sidebar.is-collapsed .wp-sidebar-identity { padding-bottom: 15px; }
+.wp-sidebar.is-collapsed .wp-nav { justify-content: center; padding: 6px 0; min-height: 46px; }
+.wp-sidebar.is-collapsed .wp-nav-count { position: absolute; right: 1px; top: 1px; min-width: 15px; padding: 1px 3px; border-radius: 4px; font-size: 9px; background: var(--color-raised); color: var(--color-ink); }
+.wp-sidebar.is-collapsed .wp-nav-current { display: none; }
+.wp-sidebar.is-collapsed .wp-nav-section + .wp-nav-section { border-top: 1px solid var(--color-hairline); padding-top: 14px; }
+.wp-statusbar { position: relative; z-index: 45; min-height: 38px; display: flex; align-items: center; gap: 14px; padding: 3px 16px; border-top: 1px solid var(--color-hairline); background: var(--color-chrome); flex-shrink: 0; user-select: none; color: var(--color-faint); font-size: 11px; }
+.wp-status-details { position: relative; flex-shrink: 0; }
+.wp-status-trigger { display: flex; align-items: center; gap: 7px; min-height: 30px; padding: 0 4px; border-radius: 4px; cursor: pointer; list-style: none; }
+.wp-status-trigger::-webkit-details-marker { display: none; }
+.wp-status-trigger:hover, .wp-status-details[open] .wp-status-trigger { color: var(--color-ink); }
+.wp-status-trigger > svg { width: 13px; height: 13px; }
+.wp-status-trigger .wp-status-chevron { width: 11px; height: 11px; transform: rotate(180deg); }
+.wp-status-details[open] .wp-status-chevron { transform: none; }
+.wp-status-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--color-faint); }
+.wp-status-dot.is-ok { background: var(--color-done); }
+.wp-status-warning { color: var(--color-alert); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wp-status-popover { position: absolute; left: 0; bottom: calc(100% + 10px); width: min(280px, calc(100vw - 32px)); padding: 16px; background: var(--color-paper); border: 1px solid var(--color-hairline); border-radius: 8px; box-shadow: 0 12px 40px #0006; color: var(--color-muted); }
+.wp-status-popover-heading { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 12px; color: var(--color-ink); font-size: 12px; }
+.wp-status-popover-heading > :last-child { color: var(--color-faint); font-size: 10px; }
+.wp-status-popover dl { display: grid; gap: 10px; }
+.wp-status-popover dl > div { display: flex; justify-content: space-between; gap: 12px; }
+.wp-status-popover dd:not(.text-alert) { color: var(--color-ink); }
+.wp-status-popover button { margin-top: 15px; padding-top: 12px; border-top: 1px solid var(--color-hairline); display: flex; align-items: center; justify-content: space-between; width: 100%; color: var(--color-beacon); cursor: pointer; }
+.wp-status-popover button svg { width: 13px; height: 13px; }
+.wp-status-actions { margin-left: auto; display: flex; align-items: center; gap: 22px; flex-shrink: 0; }
+.wp-hotkey-hint { display: flex; align-items: center; gap: 7px; }
+.wp-hotkey-hint svg { width: 14px; height: 14px; }
+.wp-hotkey-hint kbd { font-family: var(--font-mono); font-size: 10px; color: var(--color-muted); }
+.wp-zoom-control { display: flex; align-items: center; gap: 1px; padding-left: 14px; border-left: 1px solid var(--color-hairline); }
+.wp-zoom-control button { display: flex; align-items: center; justify-content: center; gap: 2px; min-width: 28px; min-height: 28px; border-radius: 4px; color: var(--color-muted); cursor: pointer; }
+.wp-zoom-control button:hover { background: var(--color-paper); color: var(--color-ink); }
+.wp-zoom-control button:disabled { opacity: .3; cursor: default; background: transparent; }
+.wp-zoom-control svg { width: 13px; height: 13px; }
+.wp-zoom-control .wp-zoom-value { min-width: 52px; font-family: var(--font-mono); font-size: 11px; }
+.wp-zoom-value span { color: var(--color-faint); font-size: 10px; }
+.wp-sidebar button:focus-visible, .wp-statusbar :is(button, summary):focus-visible { outline: 2px solid var(--color-beacon); outline-offset: -2px; }
+@media (max-height: 650px) {
+  .wp-sidebar { padding-top: 8px; }
+  .wp-sidebar-identity { padding: 4px 0 10px; }
+  .wp-sidebar-navigation { gap: 14px; padding-top: 12px; }
+  .wp-nav { min-height: 40px; }
+}
+@media (max-height: 560px) {
+  .wp-sidebar { padding-block: 6px; }
+  .wp-sidebar-identity, .wp-sidebar.is-collapsed .wp-sidebar-identity { padding: 2px 0 6px; }
+  .wp-character-switch { min-height: 44px; }
+  .wp-sidebar-navigation { gap: 6px; padding-top: 6px; }
+  .wp-nav-section { gap: 2px; }
+  .wp-nav-section-label { display: none; }
+  .wp-nav, .wp-nav-section.is-tools .wp-nav, .wp-sidebar.is-collapsed .wp-nav { min-height: 28px; padding-block: 0; }
+  .wp-nav.is-active::before { top: 6px; bottom: 6px; }
+  .wp-nav-icon > * { width: 17px; height: 17px; }
+  .wp-nav-section.is-tools, .wp-sidebar.is-collapsed .wp-nav-section + .wp-nav-section { padding-top: 6px; }
+}
+@media (max-width: 1000px) {
+  .wp-shell:not(.is-sidebar-collapsed) { --sidebar-width: 194px; }
+  .wp-titlebar-context { padding-inline: 16px; gap: 8px; }
+  .wp-statusbar { padding-inline: 10px; gap: 8px; }
+  .wp-status-actions { gap: 10px; }
+  .wp-hotkey-hint > span { display: none; }
+}
+@media (max-width: 500px) {
+  .wp-hotkey-hint { display: none; }
+  .wp-zoom-control { padding-left: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .wp-sidebar, .wp-sidebar *, .wp-statusbar * { transition: none !important; }
+}
+
+.wp-char-menu {
+  background: var(--color-paper);
+  border: 1px solid var(--color-hairline);
+  border-radius: 8px;
+  padding: 4px;
+  max-height: min(320px, calc(100vh - 72px));
+  overflow-y: auto;
+  box-shadow:
+    0 1px 0 color-mix(in srgb, var(--color-ink) 5%, transparent) inset,
+    0 16px 36px color-mix(in srgb, #000 42%, transparent);
+}
+.wp-char-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.wp-char-option:hover,
+.wp-char-option:focus-visible {
+  background: var(--color-raised);
+  outline: none;
+}
+.wp-char-option.is-active {
+  background: var(--color-raised);
+}
+.wp-char-option.is-active .wp-char-option-name {
+  color: var(--color-beacon);
+}
+
+.wp-stamp-jx3 { box-shadow: inset 3px 0 0 var(--color-stamp-jx3); }
+.wp-stamp-sky { box-shadow: inset 3px 0 0 var(--color-stamp-sky); }
+.wp-stamp-nsh { box-shadow: inset 3px 0 0 var(--color-stamp-nsh); }
+.wp-stamp-gal { box-shadow: inset 3px 0 0 var(--color-stamp-gal); }
+.wp-stamp-beacon { box-shadow: inset 3px 0 0 var(--color-beacon); }
+.wp-stamp-done { box-shadow: inset 3px 0 0 var(--color-done); }
+.wp-stamp-alert { box-shadow: inset 3px 0 0 var(--color-alert); }
+
+.wp-frame-day {
+  outline: 1px solid color-mix(in srgb, var(--color-beacon) 55%, transparent);
+  outline-offset: 0;
+  box-shadow:
+    inset 3px 0 0 var(--color-stamp-jx3),
+    0 0 0 1px color-mix(in srgb, var(--color-beacon) 18%, transparent);
+}
+
+.wp-frame-time {
+  outline: 1px solid color-mix(in srgb, var(--color-alert) 70%, transparent);
+  outline-offset: 0;
+  animation: wp-frame-pulse 1.6s ease-in-out infinite;
+  box-shadow:
+    inset 3px 0 0 var(--color-alert),
+    0 0 0 1px color-mix(in srgb, var(--color-alert) 28%, transparent);
+}
+
+@keyframes wp-frame-pulse {
+  0%, 100% {
+    box-shadow:
+      inset 3px 0 0 var(--color-alert),
+      0 0 0 1px color-mix(in srgb, var(--color-alert) 22%, transparent);
+  }
+  50% {
+    box-shadow:
+      inset 3px 0 0 var(--color-alert),
+      0 0 0 2px color-mix(in srgb, var(--color-alert) 45%, transparent);
+  }
+}
+
+/* ---- 卡片体系：按内容选形态，不再所有东西都是同一张纸 ---- */
+
+/* 计时卡：大号倒计时数字，下面一行地点/说明 */
+.wp-timer {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 14px;
+}
+.wp-timer-value {
+  font-family: var(--font-mono);
+  font-size: 22px;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+}
+.wp-timer.is-live .wp-timer-value { color: var(--color-alert); }
+.wp-timer-label { font-size: 12px; color: var(--color-faint); }
+
+/* 数值卡：大数字 + 进度条 */
+.wp-stat {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.wp-stat-value {
+  font-family: var(--font-display);
+  font-size: 26px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.wp-meter {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--color-raised);
+  overflow: hidden;
+}
+.wp-meter > span {
+  display: block;
+  height: 100%;
+  background: var(--color-beacon);
+  border-radius: 2px;
+}
+.wp-meter.is-done > span { background: var(--color-done); }
+
+/* 活动卡：上方 3:1 横幅，状态和剩余天数压在图上 */
+.wp-banner {
+  position: relative;
+  aspect-ratio: 3 / 1;
+  background: var(--color-raised);
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+}
+.wp-banner > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.wp-banner-tag {
+  position: absolute;
+  left: 10px;
+  bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  background: color-mix(in srgb, var(--color-canvas) 78%, transparent);
+  color: var(--color-ink);
+  backdrop-filter: blur(4px);
+}
+.wp-banner-tag.is-ending { color: var(--color-alert); }
+
+/* 物品格：统一 3:4、统一底色，名字和价格在下面；没有可靠实穿图时显示图标 */
+.wp-tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 156px), 1fr));
+  gap: 22px 16px;
+}
+.wp-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+.wp-tile-media {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 2px;
+  background: var(--color-paper);
+  border: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  cursor: zoom-in;
+}
+.wp-tile-media:disabled { cursor: default; }
+.wp-tile-visual { position: relative; }
+.wp-tile.is-icon-mode .wp-tile-media { aspect-ratio: 1; }
+.wp-tile-support { position: absolute; bottom: 0; left: 0; right: 0; padding: 2px 5px; background: color-mix(in srgb, var(--color-paper) 92%, transparent); border-radius: 0 0 5px 5px; }
+.wp-tile-frame { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 100%; aspect-ratio: 3 / 4; overflow: hidden; }
+.wp-view-image { position: absolute; left: 0; top: 0; width: 100%; height: 100%; max-width: none; object-fit: fill; }
+.wp-tile-status { position: absolute; bottom: 6px; font-size: 12px; color: var(--color-muted); }
+.wp-tile-placeholder { width: 100%; padding: 12px; text-align: center; font-size: 12px; color: var(--color-faint); }
+.wp-tile-expand { position: absolute; right: 6px; top: 6px; width: 16px; height: 16px; color: var(--color-ink); background: var(--color-paper); border-radius: 3px; }
+.wp-tile-views { display: flex; align-items: center; justify-content: space-between; gap: 2px; font-size: 12px; color: var(--color-muted); }
+.wp-tile-views > button { min-width: 28px; min-height: 28px; display: grid; place-items: center; border-radius: 4px; cursor: pointer; }
+.wp-tile-views svg { width: 14px; height: 14px; }
+.wp-tile-views small { color: var(--color-faint); font-size: 11px; }
+.wp-tile-views > button:hover, .wp-tile-obtained:hover { background: var(--color-raised); color: var(--color-ink); }
+.wp-tile-retry { display: flex; align-items: center; gap: 4px; font-size: 12px; color: var(--color-alert); cursor: pointer; text-align: left; }
+.wp-tile-obtained { align-self: start; padding: 3px 7px; border: 1px solid var(--color-hairline); border-radius: 4px; color: var(--color-muted); font-size: 12px; cursor: pointer; }
+.wp-tile-obtained[aria-pressed="true"] { color: var(--color-done); border-color: var(--color-done); }
+.wp-tile-media > img.is-icon { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 44%; height: auto; opacity: 0.9; }
+.wp-tile.is-done .wp-tile-name { color: var(--color-done); }
+.wp-tile-name { font-size: 14px; color: var(--color-ink); line-height: 1.5; }
+.wp-tile-meta { font-size: 11px; color: var(--color-faint); font-family: var(--font-mono); }
+
+/* 长列表里屏外的卡片跳过布局和绘制，效果接近虚拟滚动，不用改列表结构 */
+.wp-offscreen {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 180px;
+}
+
+/* 清单：任务类用紧凑行，不用卡片 */
+.wp-checklist { display: flex; flex-direction: column; }
+.wp-checklist > * + * { border-top: 1px solid var(--color-hairline); }
+.wp-check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  min-height: 34px;
+}
+.wp-check-row.is-done { color: var(--color-faint); }
+.wp-check-row.is-done .wp-check-title { text-decoration: line-through; text-decoration-color: var(--color-hairline); }
+
+.wp-task-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.wp-guide-prose {
+  font-size: 15px;
+  line-height: 1.85;
+  color: var(--color-ink);
+}
+/* 正文插图：整宽显示，下面带说明；点开放大 */
+.wp-guide-figure {
+  display: block;
+  margin: 14px 0;
+}
+.wp-guide-figure > img {
+  display: block;
+  width: 100%;
+  max-height: 520px;
+  object-fit: contain;
+  background: var(--color-canvas);
+  border: 1px solid var(--color-hairline);
+  border-radius: 8px;
+  cursor: zoom-in;
+}
+.wp-guide-figure-cap {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--color-faint);
+  text-align: center;
+}
+/* 结局标签：TE 金、GE 绿、NE 灰、BE 红 */
+.wp-end {
+  display: inline-block;
+  padding: 1px 7px;
+  margin: 0 2px;
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid;
+}
+.wp-end-true { color: var(--color-beacon); background: color-mix(in srgb, var(--color-beacon) 14%, transparent); border-color: color-mix(in srgb, var(--color-beacon) 45%, transparent); }
+.wp-end-good { color: var(--color-done); background: color-mix(in srgb, var(--color-done) 12%, transparent); border-color: color-mix(in srgb, var(--color-done) 40%, transparent); }
+.wp-end-normal { color: var(--color-muted); background: var(--color-raised); border-color: var(--color-hairline); }
+.wp-end-bad { color: var(--color-alert); background: color-mix(in srgb, var(--color-alert) 10%, transparent); border-color: color-mix(in srgb, var(--color-alert) 38%, transparent); }
+.wp-guide-prose .wp-guide-h {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.wp-guide-kicker {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1;
+}
+.wp-guide-note {
+  padding: 4px 0 4px 16px;
+  border-left: 2px solid var(--color-beacon);
+  color: var(--color-muted);
+  font-size: 13px;
+  line-height: 1.9;
+  white-space: pre-line;
+}
+.wp-guide-route-body { padding: 0; }
+.wp-guide-choice {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr);
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 10px;
+  margin: 5px 0;
+  border-left: 2px solid transparent;
+  border-bottom: 1px solid color-mix(in srgb, var(--color-hairline) 55%, transparent);
+  transition: background-color 120ms;
+}
+/* 选项像按钮：悬停高亮，点一下就记成"读到这里" */
+.wp-guide-choice:hover {
+  border-color: color-mix(in srgb, var(--color-beacon) 40%, var(--color-hairline));
+  background: color-mix(in srgb, var(--color-beacon) 6%, var(--color-raised));
+}
+.wp-guide-choice.is-here {
+  background: color-mix(in srgb, var(--color-beacon) 14%, var(--color-raised));
+  border-color: color-mix(in srgb, var(--color-beacon) 48%, var(--color-hairline));
+  box-shadow: inset 3px 0 0 var(--color-beacon);
+}
+.wp-guide-num {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-beacon);
+  background: transparent;
+}
+.wp-guide-sub {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 4px 0 4px 2.35rem;
+  padding: 7px 10px;
+  color: var(--color-muted);
+  font-size: 13px;
+  border-left: 1px solid var(--color-hairline);
+}
+.wp-guide-cue {
+  display: grid;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  align-items: stretch;
+  margin: 12px 0 8px;
+  min-height: 2.5rem;
+  overflow: hidden;
+  border-radius: 6px;
+  border: 1px solid var(--color-hairline);
+}
+.wp-guide-cue .wp-guide-kicker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+}
+.wp-guide-cue-text {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.wp-guide-cue-save {
+  color: var(--color-beacon);
+  background: color-mix(in srgb, var(--color-beacon) 10%, var(--color-paper));
+  border-color: color-mix(in srgb, var(--color-beacon) 42%, var(--color-hairline));
+}
+.wp-guide-cue-save .wp-guide-kicker {
+  color: var(--color-beacon);
+  background: color-mix(in srgb, var(--color-beacon) 22%, var(--color-canvas));
+}
+.wp-guide-cue-load {
+  color: var(--color-stamp-gal);
+  background: color-mix(in srgb, var(--color-stamp-gal) 10%, var(--color-paper));
+  border-color: color-mix(in srgb, var(--color-stamp-gal) 42%, var(--color-hairline));
+}
+.wp-guide-cue-load .wp-guide-kicker {
+  color: var(--color-stamp-gal);
+  background: color-mix(in srgb, var(--color-stamp-gal) 22%, var(--color-canvas));
+}
+.wp-guide-cue-end {
+  color: var(--color-done);
+  background: color-mix(in srgb, var(--color-done) 10%, var(--color-paper));
+  border-color: color-mix(in srgb, var(--color-done) 42%, var(--color-hairline));
+}
+.wp-guide-cue-end .wp-guide-kicker {
+  color: var(--color-done);
+  background: color-mix(in srgb, var(--color-done) 22%, var(--color-canvas));
+}
+.wp-guide-tip {
+  margin: 12px 0;
+  padding: 4px 0 4px 14px;
+  color: var(--color-muted);
+  font-size: 13px;
+  border-left: 2px solid var(--color-stamp-gal);
+}
+.wp-guide-section {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 16px 4px 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--color-hairline);
+}
+.wp-guide-chapter {
+  margin: 22px 0 10px;
+}
+.wp-guide-chapter .wp-guide-kicker {
+  margin-bottom: 6px;
+  color: var(--color-stamp-gal);
+}
+.wp-guide-chapter h3 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+.wp-guide-chapter.is-h1 h3 {
+  font-size: 26px;
+}
+.wp-guide-chapter.is-h3 h3 {
+  font-size: 17px;
+}
+.wp-guide-body {
+  margin: 0 0 10px;
+  color: var(--color-ink);
+  line-height: 1.85;
+  /* 正文段落一行 34 个汉字左右（≈68ch）最好读；表格和路线卡不受限 */
+  max-width: 68ch;
+}
+/* 按日期走的一步：左边日期等宽对齐，正文在右，逐日往下扫 */
+.wp-guide-day {
+  display: grid;
+  grid-template-columns: 5.5em minmax(0, 1fr);
+  gap: 10px;
+  align-items: baseline;
+  padding: 6px 4px;
+  color: var(--color-ink);
+  line-height: 1.7;
+}
+.wp-guide-day + .wp-guide-day {
+  border-top: 1px dashed color-mix(in srgb, var(--color-hairline) 70%, transparent);
+}
+.wp-guide-date {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-stamp-gal);
+  white-space: nowrap;
+}
+.wp-guide-sep {
+  margin: 0 4px;
+  color: var(--color-faint);
+}
+.wp-guide-bullet {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 4px;
+  color: var(--color-ink);
+}
+.wp-guide-mark.is-here {
+  box-shadow: inset 3px 0 0 var(--color-beacon);
+  background: color-mix(in srgb, var(--color-beacon) 10%, transparent);
+  border-radius: 4px;
+}
+.wp-guide-bullet-mark {
+  width: 6px;
+  height: 6px;
+  flex-shrink: 0;
+  margin-top: 8px;
+  border-radius: 1px;
+  background: var(--color-stamp-gal);
+}
+.wp-guide-rule {
+  height: 1px;
+  margin: 16px 4px;
+  background: color-mix(in srgb, var(--color-faint) 55%, transparent);
+}
+.wp-guide-zoom-clip {
+  display: block;
+  max-width: 100%;
+  margin: 10px 0;
+  overflow-x: auto;
+  border-radius: 6px;
+  line-height: 0;
+}
+.wp-guide-zoom {
+  display: block;
+  width: auto;
+  max-width: none;
+  height: 88px;
+  cursor: zoom-in;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-beacon) 28%, transparent);
+  color: var(--color-ink);
+}
+
+/* 攻略宽表在阅读区域内滚动，避免路线被压成逐字竖排。 */
+.wp-guide-prose table :is(th,td){min-width:150px;vertical-align:top;overflow-wrap:anywhere}
+.wp-guide-prose table img{max-width:220px;max-height:200px;object-fit:contain}
+
+.wp-tile.is-collection-tile { border: 1px solid var(--color-hairline); border-radius: 8px; padding: 8px; background: color-mix(in srgb, var(--color-raised) 28%, transparent); }
+.wp-tile.is-collection-tile .wp-tile-media { border-radius: 5px; background: transparent; }
+.wp-tile.is-collection-tile .wp-tile-name { min-height: 42px; font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.wp-tile-fallback { color: var(--color-muted); font-size: 11px; }
+.wp-tile-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: auto; padding-top: 6px; border-top: 1px solid var(--color-hairline); }
+.wp-tile-actions button { min-height: 32px; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; color: var(--color-muted); }
+.wp-tile-actions .wp-tile-obtained { border: 0; padding: 3px; }
+.wp-tile-actions [aria-pressed="true"] { color: var(--color-done); }
+.wp-tile-actions .wp-tile-wish[aria-pressed="true"] { color: var(--color-beacon); }
+.wp-tile-actions .wp-tile-wish { padding: 6px; }
+.wp-tile button:focus-visible { outline: 2px solid var(--color-beacon); outline-offset: 2px; }

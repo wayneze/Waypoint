@@ -1,0 +1,53 @@
+{
+  "version": 2,
+  "realms": [
+    "星光沙漠", "圆梦村", "大树屋", "圣岛", "云巢", "晨岛", "云野", "雨林",
+    "霞谷", "暮土", "禁阁", "伊甸", "方舟", "遇境"
+  ],
+  "sectionNames": {
+    "quests": ["每日任务", "日常任务"],
+    "seasonal": ["季蜡", "季节蜡烛"],
+    "treasure": ["大蜡", "大蜡烛"],
+    "shard": ["落石", "落石点", "红石", "黑石"]
+  },
+  "imageRoles": [
+    { "role": "seasonCandle", "any": ["季蜡", "季节蜡烛"] },
+    { "role": "quests", "any": ["任务", "日常"] },
+    { "role": "treasureCandle", "any": ["大蜡", "大蜡烛"] },
+    { "role": "shard", "any": ["落石", "红石", "黑石"] },
+    { "role": "token", "any": ["代币"] }
+  ],
+  "quests": [
+    { "id": "high_five", "title": "和好友击掌", "any": ["击掌"], "category": "social", "categoryLabel": "社交互动", "realm": "遇境 / 任意", "tip": "与已解锁击掌的好友互动；集结季向导处也可完成。" },
+    { "id": "hug", "title": "和好友拥抱", "any": ["拥抱"], "category": "social", "categoryLabel": "社交互动", "realm": "遇境 / 任意", "tip": "需先解锁拥抱动作。" },
+    { "id": "hold_hands", "title": "和好友牵手", "any": ["牵手"], "category": "social", "categoryLabel": "社交互动", "realm": "遇境 / 任意", "tip": "与好友建立牵手即可。" },
+    { "id": "gift_heart", "title": "给好友送礼", "any": ["送礼", "送心"], "category": "social", "categoryLabel": "社交互动", "realm": "遇境 / 任意", "tip": "向好友送出一颗爱心。" },
+    { "id": "wave", "title": "向玩家招手", "any": ["招手", "挥手"], "category": "social", "categoryLabel": "社交互动", "realm": "任意", "tip": "对附近玩家使用招手。" },
+    { "id": "light_player", "title": "点亮其他玩家", "any": ["点亮玩家", "点亮其他"], "category": "social", "categoryLabel": "社交互动", "realm": "任意", "tip": "点燃另一位玩家的蜡烛。" },
+    { "id": "make_wish", "title": "在遇境许愿", "all": ["许愿"], "category": "social", "categoryLabel": "社交互动", "realm": "遇境", "tip": "遇境神坛许愿。" },
+    { "id": "flip_crab", "title": "掀翻螃蟹", "all": ["螃蟹"], "any": ["掀翻", "翻开"], "category": "creature", "categoryLabel": "环境生物", "realm": "暮土", "tip": "在螃蟹旁长按大叫掀翻。暮土图一管道旁最省事。" },
+    { "id": "crab_call", "title": "对螃蟹大叫", "all": ["螃蟹"], "any": ["对螃蟹", "朝螃蟹", "大叫"], "category": "creature", "categoryLabel": "环境生物", "realm": "暮土", "tip": "对着螃蟹使用呼唤。" },
+    { "id": "follow_jelly", "title": "跟随水母", "any": ["跟随水母"], "category": "creature", "categoryLabel": "环境生物", "realm": "雨林", "tip": "雨林水母图或禁阁水母湾。" },
+    { "id": "jelly_energy", "title": "在水母上恢复能量", "all": ["水母"], "any": ["恢复能量", "回能"], "category": "collect", "categoryLabel": "环境恢复", "realm": "雨林", "tip": "先把斗篷能量耗尽，再踩发光水母。" },
+    { "id": "follow_butterfly", "title": "跟随蝴蝶", "any": ["跟随蝴蝶", "追蝴蝶"], "category": "creature", "categoryLabel": "环境生物", "realm": "云野", "tip": "云野蝴蝶平原。" },
+    { "id": "follow_manta", "title": "跟随鳐鱼", "any": ["跟随遥鲲", "跟随鳐", "跟随鲲"], "category": "creature", "categoryLabel": "环境生物", "realm": "云野", "tip": "云野或霞谷看鲲路线。" },
+    { "id": "save_manta", "title": "帮助鲲", "any": ["救鲲", "帮助鲲", "帮助遥鲲"], "category": "creature", "categoryLabel": "环境生物", "realm": "云野", "tip": "把困住的鲲带回光之中。" },
+    { "id": "burn_dark", "title": "净化黑暗植物", "any": ["黑暗植物", "净化黑暗", "烧黑暗"], "category": "collect", "categoryLabel": "净化", "realm": "雨林 / 暮土", "tip": "点燃黑暗植物即可。" },
+    { "id": "collect_light", "title": "收集光之碎片", "any": ["光之碎片", "收集光芒"], "category": "collect", "categoryLabel": "收集", "realm": "任意", "tip": "按任务提示的地图收集碎光。" },
+    { "id": "collect_wax", "title": "收集烛火", "any": ["收集烛火", "收集蜡烛"], "category": "collect", "categoryLabel": "收集", "realm": "任意", "tip": "任务指定地图内收满烛火。" },
+    { "id": "light_candle", "title": "点燃蜡烛", "any": ["点燃蜡烛", "点蜡烛", "点亮蜡烛"], "category": "collect", "categoryLabel": "收集", "realm": "任意", "tip": "点燃任务要求数量的蜡烛。" },
+    { "id": "relive_spirit", "title": "重温先祖回忆", "any": ["重温", "先祖回忆", "先祖的美好"], "category": "spirit", "categoryLabel": "先祖回忆", "needRealm": true, "tip": "找到该图未完成或常驻先祖，跟随金色光点走完回忆。" },
+    { "id": "meditate", "title": "冥想", "any": ["冥想"], "category": "meditation", "categoryLabel": "冥想", "needRealm": true, "tip": "找到该图冥想圈坐下直至完成。" },
+    { "id": "ride_slide", "title": "滑行", "any": ["滑行", "滑雪"], "category": "collect", "categoryLabel": "跑图", "realm": "霞谷", "tip": "霞谷滑雪赛道或溜冰场滑道。" },
+    { "id": "race", "title": "完成竞速", "any": ["竞速", "飞行赛"], "category": "collect", "categoryLabel": "跑图", "realm": "霞谷", "tip": "霞谷飞行赛或滑雪赛跑完即可，名次不论。" },
+    { "id": "kneel", "title": "鞠躬 / 磕头", "any": ["鞠躬", "磕头"], "category": "spirit", "categoryLabel": "动作", "realm": "任意", "tip": "对其他玩家或指定点使用对应动作。" },
+    { "id": "call", "title": "发出呼唤", "any": ["发出呼唤", "长按大叫"], "category": "social", "categoryLabel": "动作", "realm": "任意", "tip": "长按角色发出呼唤光波。" },
+    { "id": "campfire_sit", "title": "在篝火旁坐下", "all": ["坐下"], "any": ["篝火", "火堆", "休息"], "category": "meditation", "categoryLabel": "动作", "realm": "任意", "tip": "在篝火旁使用坐下并等待完成。" },
+    { "id": "fly", "title": "飞行一段距离", "any": ["飞行一段", "飞一段"], "category": "collect", "categoryLabel": "跑图", "realm": "任意", "tip": "保持飞行直至任务勾上。" },
+    { "id": "visit_elder", "title": "拜访长老神庙", "any": ["拜访长老", "长老神庙", "长老神殿"], "category": "meditation", "categoryLabel": "跑图", "needRealm": true, "tip": "进入该图终点神庙。" },
+    { "id": "visit_shrine", "title": "造访神坛", "any": ["造访神坛", "拜访神坛"], "category": "meditation", "categoryLabel": "跑图", "needRealm": true, "tip": "前往任务地图的神坛。" },
+    { "id": "save_spirit", "title": "拯救失落星", "any": ["失落星", "坠落星"], "category": "collect", "categoryLabel": "收集", "realm": "任意", "tip": "把光之子带回遇境或指定点。" },
+    { "id": "kite_vote", "title": "提交风筝设计", "any": ["风筝"], "category": "collect", "categoryLabel": "活动", "realm": "云野", "tip": "云野中央神坛提交风筝设计。" },
+    { "id": "bench_sit", "title": "和陌生人坐长凳", "any": ["长凳", "石凳"], "category": "social", "categoryLabel": "社交互动", "realm": "任意", "tip": "除晨岛和遇境外，地图大厅前石凳可与陌生玩家同坐。" }
+  ]
+}

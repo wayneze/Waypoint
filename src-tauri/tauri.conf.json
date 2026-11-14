@@ -1,0 +1,66 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Waypoint",
+  "version": "0.1.0",
+  "identifier": "com.waypoint.app",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "dragDropEnabled": false,
+        "create": false,
+        "title": "Waypoint · 个人游戏桌面工作台",
+        "width": 1160,
+        "height": 670,
+        "minWidth": 860,
+        "minHeight": 520,
+        "center": true,
+        "decorations": false,
+        "shadow": true,
+        "resizable": true,
+        "visible": true,
+        "focus": true
+      },
+      {
+        "label": "quick-memo",
+        "create": false,
+        "url": "quick-memo.html",
+        "title": "记一笔",
+        "width": 640,
+        "height": 92,
+        "center": false,
+        "x": 0,
+        "y": 0,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "resizable": false,
+        "alwaysOnTop": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "focus": false,
+        "backgroundColor": [0, 0, 0, 0]
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob: https: http://img.localhost; connect-src 'self' ipc: http://ipc.localhost https:; media-src 'self' blob: https:"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ]
+  }
+}

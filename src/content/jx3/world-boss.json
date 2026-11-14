@@ -1,0 +1,23 @@
+{
+  "idleName": "跨服世界首领",
+  "idleMap": "周三、周五晚间跨服争夺",
+  "drops": [
+    "本赛季跨服世界首领掉落",
+    "精炼与声望道具",
+    "碎银与威名点"
+  ],
+  "slots": [
+    {
+      "weekday": 3,
+      "weekdayLabel": "周三",
+      "startHour": 20,
+      "endHour": 21
+    },
+    {
+      "weekday": 5,
+      "weekdayLabel": "周五",
+      "startHour": 20,
+      "endHour": 21
+    }
+  ]
+}

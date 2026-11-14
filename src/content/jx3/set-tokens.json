@@ -1,0 +1,1392 @@
+[
+  {
+    "id": "token_rufeng",
+    "seriesName": "儒风套",
+    "level": "95年代经典",
+    "dungeon": "永王行宫 · 仙侣庭园 & 花月别院",
+    "pinyin": "rf / rufeng",
+    "pieces": {
+      "head": {
+        "name": "儒风·冠/帽",
+        "boss": "仙侣·屈焰阳 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "儒风·衣/袍",
+        "boss": "仙侣·李玚 (老三)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "儒风·腰带",
+        "boss": "花月·韩非池 (老一)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "儒风·护腕",
+        "boss": "花月·莫雨 (老二)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "儒风·鞋履",
+        "boss": "花月·李白 (老三)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_shuoxue",
+    "seriesName": "朔雪套",
+    "level": "90年代后期",
+    "dungeon": "太原 · 夜守孤城 & 逐虎过江",
+    "pinyin": "sx / shuoxue",
+    "aliases": ["溯雪", "溯雪套"],
+    "pieces": {
+      "head": {
+        "name": "朔雪·冠/帽",
+        "boss": "夜守·田布戈 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "朔雪·衣/袍",
+        "boss": "逐虎·白陶 (老二)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "朔雪·腰带",
+        "boss": "夜守·朝曦门防御 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "朔雪·护腕",
+        "boss": "逐虎·安雨 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "朔雪·鞋履",
+        "boss": "逐虎·史思明 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_qinfeng",
+    "seriesName": "秦风套",
+    "level": "90年代中期",
+    "dungeon": "秦皇陵 & 风雪稻香村",
+    "pinyin": "qf / qinfeng",
+    "pieces": {
+      "head": {
+        "name": "秦风·冠/帽",
+        "boss": "秦皇陵·王翦 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "秦风·衣/袍",
+        "boss": "秦皇陵·安禄山 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "秦风·腰带",
+        "boss": "稻香村·山狼 (老一)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "秦风·护腕",
+        "boss": "稻香村·黑鹰 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "秦风·鞋履",
+        "boss": "秦皇陵·令狐伤 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_yanyun",
+    "seriesName": "燕云套",
+    "level": "95年代中期",
+    "dungeon": "风雷刀谷 · 锻刀厅 & 战狂阁",
+    "pinyin": "yy / yanyun",
+    "aliases": ["雁云", "雁云套"],
+    "pieces": {
+      "head": {
+        "name": "燕云·冠/帽",
+        "boss": "锻刀·史思明 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "燕云·衣/袍",
+        "boss": "锻刀·解语 (老四)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "燕云·腰带",
+        "boss": "锻刀·柳愚 (老三)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "燕云·护腕",
+        "boss": "锻刀·柳哲 (老二)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "燕云·鞋履",
+        "boss": "锻刀·柳时清 (老五)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_chiming",
+    "seriesName": "驰冥套",
+    "level": "95年代毕业",
+    "dungeon": "风雷刀谷 · 千雷殿",
+    "pinyin": "cm / chiming",
+    "aliases": ["迟冥", "迟冥套", "驰名", "驰名套"],
+    "pieces": {
+      "head": {
+        "name": "驰冥·冠/帽",
+        "boss": "千雷·伊玛目 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "驰冥·衣/袍",
+        "boss": "千雷·柳秀岳 (老二)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "驰冥·腰带",
+        "boss": "千雷·柳鸾旗 (老三)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "驰冥·护腕",
+        "boss": "千雷·柳鸾旗 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "驰冥·鞋履",
+        "boss": "千雷·柳秀岳 (老二)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_hemeng",
+    "seriesName": "鹤梦套",
+    "level": "100年代初期",
+    "dungeon": "世外蓬莱 · 冰火岛",
+    "pinyin": "hm / hemeng",
+    "pieces": {
+      "head": {
+        "name": "鹤梦·冠/帽",
+        "boss": "冰火岛·康疑 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "鹤梦·衣/袍",
+        "boss": "冰火岛·伊玛目 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "鹤梦·腰带",
+        "boss": "冰火岛·泊尔思 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "鹤梦·护腕",
+        "boss": "冰火岛·李璘 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "鹤梦·鞋履",
+        "boss": "冰火岛·迟驻 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_lingjue",
+    "seriesName": "凌绝套",
+    "level": "100年代毕业",
+    "dungeon": "世外蓬莱 · 巨冥湾",
+    "pinyin": "lj / lingjue",
+    "aliases": ["临绝", "临绝套", "零绝", "零绝套"],
+    "pieces": {
+      "head": {
+        "name": "凌绝·冠/帽",
+        "boss": "巨冥湾·孙楚珊 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "凌绝·衣/袍",
+        "boss": "巨冥湾·晏灾 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "凌绝·腰带",
+        "boss": "巨冥湾·虎头 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "凌绝·护腕",
+        "boss": "巨冥湾·武长生 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "凌绝·鞋履",
+        "boss": "巨冥湾·无面鬼 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_xingyan",
+    "seriesName": "星演套",
+    "level": "110年代经典",
+    "dungeon": "奉天证道 · 达摩洞",
+    "pinyin": "xy / xingyan",
+    "pieces": {
+      "head": {
+        "name": "星演·冠/帽",
+        "boss": "达摩洞·余晖 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "星演·衣/袍",
+        "boss": "达摩洞·史思明 (老六)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "星演·腰带",
+        "boss": "达摩洞·宓桃 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "星演·护腕",
+        "boss": "达摩洞·武蒙 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "星演·鞋履",
+        "boss": "达摩洞·提多罗吒 (老五)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_chiling",
+    "seriesName": "蚩灵套",
+    "level": "80年代初期",
+    "dungeon": "英雄荻花圣殿 & 龙渊泽",
+    "pinyin": "cl / chiling",
+    "aliases": ["嗤灵", "嗤灵套", "迟灵", "迟灵套"],
+    "pieces": {
+      "head": {
+        "name": "蚩灵·冠/帽",
+        "boss": "荻花·慕容追风 (老二)",
+        "obtained": false
+      },
+      "body": {
+        "name": "蚩灵·衣/袍",
+        "boss": "荻花·沙利亚 (老六)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "蚩灵·腰带",
+        "boss": "龙渊·辽东双雄 (老一)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "蚩灵·护腕",
+        "boss": "龙渊·南诏双帅 (老二)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "蚩灵·鞋履",
+        "boss": "荻花·卫栖梧 (老三)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_nanhuang",
+    "seriesName": "南皇套",
+    "level": "80年代中期",
+    "dungeon": "英雄荻花圣殿 & 烛龙殿",
+    "pinyin": "nh / nanhuang",
+    "pieces": {
+      "head": {
+        "name": "南皇·冠/帽",
+        "boss": "烛龙·醉不归 (老二)",
+        "obtained": false
+      },
+      "body": {
+        "name": "南皇·衣/袍",
+        "boss": "荻花·阿萨辛 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "南皇·腰带",
+        "boss": "烛龙·雷神 (老四)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "南皇·护腕",
+        "boss": "烛龙·陆寻 (老五)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "南皇·鞋履",
+        "boss": "荻花·乌蒙贵 (老七)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_pojun",
+    "seriesName": "破军套",
+    "level": "80年代毕业",
+    "dungeon": "南诏皇宫",
+    "pinyin": "pj / pojun",
+    "pieces": {
+      "head": {
+        "name": "破军·冠/帽",
+        "boss": "皇宫·枯木禅师 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "破军·衣/袍",
+        "boss": "皇宫·阁逻凤 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "破军·腰带",
+        "boss": "皇宫·阁逻凤 (老五)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "破军·护腕",
+        "boss": "皇宫·萧沙 (老四)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "破军·鞋履",
+        "boss": "皇宫·李倓 (老六)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_dingguo",
+    "seriesName": "定国套",
+    "level": "90年代初期",
+    "dungeon": "战乱 · 大明宫",
+    "pinyin": "dg / dingguo",
+    "pieces": {
+      "head": {
+        "name": "定国·冠/帽",
+        "boss": "大明宫·独孤问俗 (老二)",
+        "obtained": false
+      },
+      "body": {
+        "name": "定国·衣/袍",
+        "boss": "大明宫·安禄山 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "定国·腰带",
+        "boss": "大明宫·六道轮回 (老三)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "定国·护腕",
+        "boss": "大明宫·剑圣 (老四)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "定国·鞋履",
+        "boss": "大明宫·何曦光 (老一)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_polu",
+    "seriesName": "破虏套",
+    "level": "90年代中期",
+    "dungeon": "秦皇陵 & 风雪稻香村",
+    "pinyin": "pl / polu",
+    "aliases": ["破鲁", "破鲁套"],
+    "pieces": {
+      "head": {
+        "name": "破虏·冠/帽",
+        "boss": "秦皇陵·王翦 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "破虏·衣/袍",
+        "boss": "秦皇陵·安禄山 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "破虏·腰带",
+        "boss": "稻香村·山狼 (老一)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "破虏·护腕",
+        "boss": "稻香村·黑鹰 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "破虏·鞋履",
+        "boss": "秦皇陵·令狐伤 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_weijin",
+    "seriesName": "未烬套",
+    "level": "95年代后期",
+    "dungeon": "狼牙堡 · 战兽山",
+    "pinyin": "wj / weijin",
+    "aliases": ["未晋", "未晋套"],
+    "pieces": {
+      "head": {
+        "name": "未烬·冠/帽",
+        "boss": "战兽山·报九枫 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "未烬·衣/袍",
+        "boss": "战兽山·月泉淮 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "未烬·腰带",
+        "boss": "战兽山·无意 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "未烬·护腕",
+        "boss": "战兽山·水婳 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "未烬·鞋履",
+        "boss": "战兽山·尤炼 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_zhanfeng",
+    "seriesName": "展锋套",
+    "level": "120年代初期",
+    "dungeon": "西津渡",
+    "pinyin": "zf / zhanfeng",
+    "aliases": ["展锋", "展锋套", "修罗套"],
+    "pieces": {
+      "head": {
+        "name": "展锋·冠/帽",
+        "boss": "西津渡·藤原佑野 (老五)",
+        "obtained": false
+      },
+      "body": {
+        "name": "展锋·衣/袍",
+        "boss": "西津渡·李重茂 (老六)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "展锋·腰带",
+        "boss": "西津渡·苏凤楼 (老三)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "展锋·护腕",
+        "boss": "西津渡·刘展 (老二)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "展锋·鞋履",
+        "boss": "西津渡·韩敬青 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_lanjiang",
+    "seriesName": "揽江套",
+    "level": "120年代中期",
+    "dungeon": "武狱黑牢",
+    "pinyin": "lj / lanjiang",
+    "aliases": ["揽江", "揽江套"],
+    "pieces": {
+      "head": {
+        "name": "揽江·冠/帽",
+        "boss": "武狱黑牢·和正 (老四)",
+        "obtained": false
+      },
+      "body": {
+        "name": "揽江·衣/袍",
+        "boss": "武狱黑牢·武云阙 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "揽江·腰带",
+        "boss": "武狱黑牢·乐临川 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "揽江·护腕",
+        "boss": "武狱黑牢·时风 (老一)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "揽江·鞋履",
+        "boss": "武狱黑牢·牛波 (老三)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_zhuoxin",
+    "seriesName": "濯心套",
+    "level": "120年代中后期",
+    "dungeon": "九老洞",
+    "pinyin": "zx / zhuoxin",
+    "aliases": ["濯心", "濯心套", "淮心", "淮心套", "浊心", "浊心套"],
+    "pieces": {
+      "head": {
+        "name": "濯心·冠/帽",
+        "boss": "九老洞·鬼筹 (老四)",
+        "obtained": false
+      },
+      "body": {
+        "name": "濯心·衣/袍",
+        "boss": "九老洞·麒麟 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "濯心·腰带",
+        "boss": "九老洞·钟不归 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "濯心·护腕",
+        "boss": "九老洞·魏华 (老一)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "濯心·鞋履",
+        "boss": "九老洞·岑伤 (老三)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_honghui",
+    "seriesName": "鸿辉套",
+    "level": "120年代毕业",
+    "dungeon": "冷龙峰",
+    "pinyin": "hh / honghui",
+    "aliases": ["鸿辉", "鸿辉套", "灵源", "灵源套"],
+    "pieces": {
+      "head": {
+        "name": "鸿辉·冠/帽",
+        "boss": "冷龙峰·鹰眼客 (老四)",
+        "obtained": false
+      },
+      "body": {
+        "name": "鸿辉·衣/袍",
+        "boss": "冷龙峰·赤幽明 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "鸿辉·腰带",
+        "boss": "冷龙峰·雨轻红 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "鸿辉·护腕",
+        "boss": "冷龙峰·葛木寒 (老一)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "鸿辉·鞋履",
+        "boss": "冷龙峰·喜雅 (老三)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_yanyu",
+    "seriesName": "雁虞套",
+    "level": "70年代经典",
+    "dungeon": "战宝迦兰",
+    "pinyin": "yy / yanyu",
+    "aliases": ["燕虞", "燕虞套", "雁余", "雁余套"],
+    "pieces": {
+      "head": {
+        "name": "雁虞·冠/帽",
+        "boss": "战宝·王海宾 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "雁虞·衣/袍",
+        "boss": "战宝·风秀 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "雁虞·腰带",
+        "boss": "战宝·朱癸 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "雁虞·护腕",
+        "boss": "战宝·平等 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "雁虞·鞋履",
+        "boss": "战宝·掌火 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_zhutian",
+    "seriesName": "烛天套",
+    "level": "80年代中期",
+    "dungeon": "烛龙殿",
+    "pinyin": "zt / zhutian",
+    "aliases": ["烛天", "烛天套"],
+    "pieces": {
+      "head": {
+        "name": "烛天·冠/帽",
+        "boss": "烛龙·索迪尔 (三号首领)",
+        "obtained": false
+      },
+      "body": {
+        "name": "烛天·衣/袍",
+        "boss": "烛龙·乌蒙贵 (最终首领)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "烛天·腰带",
+        "boss": "烛龙·雷神 (二号首领)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "烛天·护腕",
+        "boss": "烛龙·陆寻 (隐藏首领)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "烛天·鞋履",
+        "boss": "烛龙·醉不归 (一号首领)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_jianming",
+    "seriesName": "剑茗套",
+    "level": "70年代毕业",
+    "dungeon": "战宝迦兰",
+    "pinyin": "jm / jianming",
+    "pieces": {
+      "head": {
+        "name": "剑茗·冠/帽",
+        "boss": "战宝·餐霞 (老四)",
+        "obtained": false
+      },
+      "body": {
+        "name": "剑茗·衣/袍",
+        "boss": "战宝·千手观音 (老六)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "剑茗·腰带",
+        "boss": "战宝·风秀 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "剑茗·护腕",
+        "boss": "战宝·平等 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "剑茗·鞋履",
+        "boss": "战宝·王海宾 (老一)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_xuehe",
+    "seriesName": "雪河套",
+    "level": "95年代中期",
+    "dungeon": "风雷刀谷 · 锻刀厅",
+    "pinyin": "xh / xuehe",
+    "pieces": {
+      "head": {
+        "name": "雪河·冠/帽",
+        "boss": "锻刀·史思明 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "雪河·衣/袍",
+        "boss": "锻刀·解语 (老四)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "雪河·腰带",
+        "boss": "锻刀·柳愚 (老三)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "雪河·护腕",
+        "boss": "锻刀·柳哲 (老二)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "雪河·鞋履",
+        "boss": "锻刀·柳时清 (老五)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_heyu",
+    "seriesName": "鹤羽套",
+    "level": "95年代毕业",
+    "dungeon": "狼牙堡 · 战兽山 & 燕然峰",
+    "pinyin": "hy / heyu",
+    "pieces": {
+      "head": {
+        "name": "鹤羽·冠/帽",
+        "boss": "战兽·报九枫 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "鹤羽·衣/袍",
+        "boss": "战兽·月泉淮 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "鹤羽·腰带",
+        "boss": "战兽·无意 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "鹤羽·护腕",
+        "boss": "燕然·司徒一一 (老一)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "鹤羽·鞋履",
+        "boss": "燕然·安庆绪 (老三)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_baixiang",
+    "seriesName": "百相套",
+    "level": "110年代中期",
+    "dungeon": "白帝江关",
+    "pinyin": "bx / baixiang",
+    "pieces": {
+      "head": {
+        "name": "百相·冠/帽",
+        "boss": "白帝·罗格 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "百相·衣/袍",
+        "boss": "白帝·宫傲 (最终首领)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "百相·腰带",
+        "boss": "白帝·赵蒙 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "百相·护腕",
+        "boss": "白帝·海荼 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "百相·鞋履",
+        "boss": "白帝·宇文灭 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_taixuan",
+    "seriesName": "太玄套",
+    "level": "120年代中期",
+    "dungeon": "武狱黑牢",
+    "pinyin": "tx / taixuan",
+    "pieces": {
+      "head": {
+        "name": "太玄·冠/帽",
+        "boss": "黑牢·时od (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "太玄·衣/袍",
+        "boss": "黑牢·武云阙 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "太玄·腰带",
+        "boss": "黑牢·乐辞 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "太玄·护腕",
+        "boss": "黑牢·牛波 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "太玄·鞋履",
+        "boss": "黑牢·和正 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_xuande",
+    "seriesName": "玄德套",
+    "level": "120年代毕业",
+    "dungeon": "九老洞",
+    "pinyin": "xd / xuande",
+    "pieces": {
+      "head": {
+        "name": "玄德·冠/帽",
+        "boss": "九老·魏华 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "玄德·衣/袍",
+        "boss": "九老·月泉淮 (老六)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "玄德·腰带",
+        "boss": "九老·钟不归 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "玄德·护腕",
+        "boss": "九老·岑伤 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "玄德·鞋履",
+        "boss": "九老·麒麟 (老五)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_wenwang",
+    "seriesName": "文王套",
+    "level": "95年代前期经典",
+    "dungeon": "永王行宫 · 仙侣庭园 & 花月别院",
+    "pinyin": "ww / wenwang",
+    "aliases": ["文王", "文王套"],
+    "pieces": {
+      "head": {
+        "name": "文王·冠/帽",
+        "boss": "仙侣·屈焰阳 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "文王·衣/袍",
+        "boss": "仙侣·李玚 (老三)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "文王·腰带",
+        "boss": "花月·韩非池 (老一)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "文王·护腕",
+        "boss": "花月·莫雨 (老二)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "文王·鞋履",
+        "boss": "花月·李白 (老三)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_xiaotian",
+    "seriesName": "晓天套",
+    "level": "100年代中期",
+    "dungeon": "尘归海·巨冥湾",
+    "pinyin": "xt / xiaotian",
+    "aliases": ["晓天", "晓天套"],
+    "pieces": {
+      "head": {
+        "name": "晓天·冠/帽",
+        "boss": "巨冥湾·孙楚珊 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "晓天·衣/袍",
+        "boss": "巨冥湾·无面鬼 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "晓天·腰带",
+        "boss": "巨冥湾·安小祥 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "晓天·护腕",
+        "boss": "巨冥湾·邢不僵 (老四)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "晓天·鞋履",
+        "boss": "巨冥湾·鬼斧神工 (老三)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_leilie",
+    "seriesName": "雷烈套",
+    "level": "110年代中期",
+    "dungeon": "白帝江关",
+    "pinyin": "ll / leilie",
+    "aliases": ["雷烈", "雷烈套"],
+    "pieces": {
+      "head": {
+        "name": "雷烈·冠/帽",
+        "boss": "白帝·罗芬 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "雷烈·衣/袍",
+        "boss": "白帝·宫傲 (老七)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "雷烈·腰带",
+        "boss": "白帝·赵蒙 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "雷烈·护腕",
+        "boss": "白帝·海荼 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "雷烈·鞋履",
+        "boss": "白帝·姜集苦 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_fengshao",
+    "seriesName": "凤韶套",
+    "level": "120年代",
+    "dungeon": "冷龙峰",
+    "pinyin": "fs / fengshao",
+    "aliases": ["凤韶", "凤韶套"],
+    "pieces": {
+      "head": {
+        "name": "凤韶·冠/帽",
+        "boss": "冷龙·葛木寒 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "凤韶·衣/袍",
+        "boss": "冷龙·赤幽明 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "凤韶·腰带",
+        "boss": "冷龙·雨轻红 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "凤韶·护腕",
+        "boss": "冷龙·喜雅 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "凤韶·鞋履",
+        "boss": "冷龙·鹰眼老七 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_mingsha",
+    "seriesName": "鸣沙套",
+    "level": "130年代前期",
+    "dungeon": "一之窟",
+    "pinyin": "ms / mingsha",
+    "aliases": ["鸣沙", "鸣沙套"],
+    "pieces": {
+      "head": {
+        "name": "鸣沙·冠/帽",
+        "boss": "一之窟·骆骆 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "鸣沙·衣/袍",
+        "boss": "一之窟·苏什 (老六)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "鸣沙·腰带",
+        "boss": "一之窟·韦柔丝 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "鸣沙·护腕",
+        "boss": "一之窟·宋雷 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "鸣沙·鞋履",
+        "boss": "一之窟·芭德 (老五)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_shuomo",
+    "seriesName": "朔漠套",
+    "level": "130年代",
+    "dungeon": "一之窟",
+    "pinyin": "sm / shuomo",
+    "aliases": ["朔漠", "朔漠套"],
+    "pieces": {
+      "head": {
+        "name": "朔漠·冠/帽",
+        "boss": "一之窟·骆骆 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "朔漠·衣/袍",
+        "boss": "一之窟·苏什 (老六)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "朔漠·腰带",
+        "boss": "一之窟·韦柔丝 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "朔漠·护腕",
+        "boss": "一之窟·宋雷 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "朔漠·鞋履",
+        "boss": "一之窟·芭德 (老五)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_zefang",
+    "seriesName": "择芳套",
+    "level": "110年代后期",
+    "dungeon": "白帝江关",
+    "pinyin": "zf / zefang",
+    "aliases": ["择芳", "择芳套"],
+    "pieces": {
+      "head": {
+        "name": "择芳·冠/帽",
+        "boss": "白帝·罗芬与胡汤 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "择芳·衣/袍",
+        "boss": "白帝·宫傲 (老七)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "择芳·腰带",
+        "boss": "白帝·赵蒙 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "择芳·护腕",
+        "boss": "白帝·海荼 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "择芳·鞋履",
+        "boss": "白帝·姜集苦 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_tianshao",
+    "seriesName": "天韶套",
+    "level": "100年代经典",
+    "dungeon": "世外蓬莱 · 冰火岛",
+    "pinyin": "ts / tianshao",
+    "aliases": ["天韶", "天韶套"],
+    "pieces": {
+      "head": {
+        "name": "天韶·冠/帽",
+        "boss": "冰火岛·康疑 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "天韶·衣/袍",
+        "boss": "冰火岛·伊玛目 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "天韶·腰带",
+        "boss": "冰火岛·泊尔思 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "天韶·护腕",
+        "boss": "冰火岛·李璘 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "天韶·鞋履",
+        "boss": "冰火岛·迟驻 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_chengji",
+    "seriesName": "承霁套",
+    "level": "110年代毕业",
+    "dungeon": "河阳之战",
+    "pinyin": "cj / chengji",
+    "aliases": ["承霁", "承霁套"],
+    "pieces": {
+      "head": {
+        "name": "承霁·冠/帽",
+        "boss": "河阳·勒齐那 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "承霁·衣/袍",
+        "boss": "河阳·常宿 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "承霁·腰带",
+        "boss": "河阳·阿阁诺 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "承霁·护腕",
+        "boss": "河阳·周通忌 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "承霁·鞋履",
+        "boss": "河阳·周贽 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_lingyuan",
+    "seriesName": "灵源套",
+    "level": "120年代",
+    "dungeon": "武狱黑牢",
+    "pinyin": "ly / lingyuan",
+    "aliases": ["灵源", "灵源套"],
+    "pieces": {
+      "head": {
+        "name": "灵源·冠/帽",
+        "boss": "黑牢·时风 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "灵源·衣/袍",
+        "boss": "黑牢·武云阙 (老六)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "灵源·腰带",
+        "boss": "黑牢·乐临川 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "灵源·护腕",
+        "boss": "黑牢·牛波 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "灵源·鞋履",
+        "boss": "黑牢·翁幼之 (老五)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_jingshi",
+    "seriesName": "靖世套",
+    "level": "90年代初期",
+    "dungeon": "战乱 · 大明宫",
+    "pinyin": "js / jingshi",
+    "aliases": ["靖世", "靖世套"],
+    "pieces": {
+      "head": {
+        "name": "靖世·冠/帽",
+        "boss": "大明宫·何莘涯 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "靖世·衣/袍",
+        "boss": "大明宫·安禄山 (老六)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "靖世·腰带",
+        "boss": "大明宫·独孤问俗 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "靖世·护腕",
+        "boss": "大明宫·六道傀儡 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "靖世·鞋履",
+        "boss": "大明宫·无名 (老五)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_shuangtian",
+    "seriesName": "霜天套",
+    "level": "90年代",
+    "dungeon": "秦皇陵 & 风雪稻香村",
+    "pinyin": "st / shuangtian",
+    "aliases": ["霜天", "霜天套"],
+    "pieces": {
+      "head": {
+        "name": "霜天·冠/帽",
+        "boss": "秦皇陵·王翦 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "霜天·衣/袍",
+        "boss": "秦皇陵·安禄山 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "霜天·腰带",
+        "boss": "稻香村·山狼 (老一)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "霜天·护腕",
+        "boss": "稻香村·黑鹰 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "霜天·鞋履",
+        "boss": "秦皇陵·令狐伤 (老四)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_shufeng",
+    "seriesName": "蜀风套",
+    "level": "80年代初期",
+    "dungeon": "英雄荻花圣殿 & 龙渊泽",
+    "pinyin": "sf / shufeng",
+    "aliases": ["蜀风", "蜀风套"],
+    "pieces": {
+      "head": {
+        "name": "蜀风·冠/帽",
+        "boss": "荻花·阿萨辛 (老三)",
+        "obtained": false
+      },
+      "body": {
+        "name": "蜀风·衣/袍",
+        "boss": "荻花·沙利亚 (老四)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "蜀风·腰带",
+        "boss": "荻花·牡丹 (老一)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "蜀风·护腕",
+        "boss": "龙渊泽·南诏双帅 (老一)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "蜀风·鞋履",
+        "boss": "荻花·大祭司 (老二)",
+        "obtained": false
+      }
+    }
+  },
+  {
+    "id": "token_duoye",
+    "seriesName": "夺夜套",
+    "level": "100年代毕业",
+    "dungeon": "范阳夜变",
+    "pinyin": "dy / duoye",
+    "aliases": ["夺夜", "夺夜套"],
+    "pieces": {
+      "head": {
+        "name": "夺夜·冠/帽",
+        "boss": "范阳·周贽 (老一)",
+        "obtained": false
+      },
+      "body": {
+        "name": "夺夜·衣/袍",
+        "boss": "范阳·安小逢 (老五)",
+        "obtained": false
+      },
+      "belt": {
+        "name": "夺夜·腰带",
+        "boss": "范阳·厌夜 (老二)",
+        "obtained": false
+      },
+      "wrist": {
+        "name": "夺夜·护腕",
+        "boss": "范阳·迟驻 (老三)",
+        "obtained": false
+      },
+      "shoes": {
+        "name": "夺夜·鞋履",
+        "boss": "范阳·白某 (老四)",
+        "obtained": false
+      }
+    }
+  }
+]
+
+
+

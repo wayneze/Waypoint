@@ -1,0 +1,17 @@
+{
+  "regions": [
+    { "id": "JP", "label": "日区", "currency": "JPY", "currencyLabel": "日元" },
+    { "id": "US", "label": "美区", "currency": "USD", "currencyLabel": "美元" },
+    { "id": "HK", "label": "港区", "currency": "HKD", "currencyLabel": "港币" }
+  ],
+  "interests": [
+    { "id": "visual_novel", "label": "Galgame / 视觉小说", "description": "文字叙事、角色路线与选择", "bangumi": "Galgame", "steam": 3799, "itad": "Visual Novel" },
+    { "id": "story", "label": "剧情丰富", "description": "故事、人物与叙事体验", "bangumi": "剧情", "steam": 1742, "itad": "Story Rich" },
+    { "id": "rpg", "label": "角色扮演", "description": "养成、队伍与角色冒险", "bangumi": "RPG", "steam": 122, "itad": "RPG" },
+    { "id": "adventure", "label": "冒险探索", "description": "探索世界与推进冒险", "bangumi": "冒险", "steam": 21, "itad": "Adventure" },
+    { "id": "puzzle", "label": "解谜推理", "description": "谜题、线索与逻辑挑战", "bangumi": "解谜", "steam": 1664, "itad": "Puzzle" },
+    { "id": "strategy", "label": "策略", "description": "战术规划与资源决策", "bangumi": "策略", "steam": 9, "itad": "Strategy" },
+    { "id": "simulation", "label": "模拟经营", "description": "建设、管理与生活模拟", "bangumi": "模拟", "steam": 599, "itad": "Simulation" },
+    { "id": "action", "label": "动作", "description": "操作、战斗与即时挑战", "bangumi": "动作", "steam": 19, "itad": "Action" }
+  ]
+}

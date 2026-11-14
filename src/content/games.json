@@ -1,0 +1,40 @@
+[
+  {
+    "id": "jx3",
+    "label": "剑网3",
+    "stamp": "jx3",
+    "kind": "catalog",
+    "dailyReset": "07:00",
+    "weeklyReset": "周一 07:00",
+    "navLabel": "剑网3 · 秘境",
+    "pageTitle": "剑网3 · 秘境百业与图鉴"
+  },
+  {
+    "id": "sky",
+    "label": "光遇",
+    "stamp": "sky",
+    "kind": "catalog",
+    "dailyReset": "00:00",
+    "weeklyReset": "周日 00:00",
+    "navLabel": "光遇 · 星盘",
+    "pageTitle": "光遇 · 蜡烛与收集"
+  },
+  {
+    "id": "nsh",
+    "label": "逆水寒",
+    "stamp": "nsh",
+    "kind": "generic",
+    "dailyReset": "00:00",
+    "weeklyReset": "周一 00:00"
+  },
+  {
+    "id": "galgame",
+    "label": "Galgame",
+    "stamp": "gal",
+    "kind": "reader",
+    "dailyReset": "00:00",
+    "weeklyReset": "周一 00:00",
+    "navLabel": "单机 · Galgame",
+    "pageTitle": "单机 · Galgame 档案"
+  }
+]
