@@ -464,6 +464,13 @@ export interface BackupProgress {
   total: number;
 }
 
+export interface RestoreProgress {
+  phase: 'reading' | 'downloading' | 'decrypting' | 'validating' | 'saving_undo' | 'replacing' | 'reloading';
+  received: number;
+  /** 0 表示服务器没有提供文件大小。 */
+  total: number;
+}
+
 export interface ObsidianGameGuide {
   /** 系列仅用于聚合展示，每部作品仍拥有独立攻略与档案。 */
   series?: string;

@@ -8,7 +8,7 @@ use serde_json::json;
 use tauri::{ipc::Channel, AppHandle, Manager, State};
 use tokio::{sync::watch, time::Instant};
 
-use crate::db::{restore_backup, db_file_path};
+use crate::db::{restore_backup, db_file_path, report_restore, RestoreProgress};
 use crate::settings::read_app_setting;
 use crate::AppState;
 
@@ -570,11 +570,46 @@ pub async fn upload_webdav_backup(
 }
 
 // Tauri Command: 从 WebDAV 下载并还原数据库
+async fn download_backup(
+    client: &Client, target: &str, user: &str, pass: &str,
+    progress: Option<&Channel<RestoreProgress>>,
+) -> Result<(Vec<u8>, Option<String>), String> {
+    report_restore(progress, "downloading", 0, 0);
+    let mut req = client.get(target).timeout(TRANSFER_TIMEOUT);
+    if !user.is_empty() { req = req.basic_auth(user, Some(pass)); }
+    let mut resp = req.send().await.map_err(|e| request_error("下载云端备份", e))?;
+    if resp.status() == StatusCode::NOT_FOUND {
+        return Err(format!("云端未找到备份文件: {}", REMOTE_BACKUP_FILENAME));
+    }
+    if !resp.status().is_success() {
+        return Err(format!("下载失败，状态码: {}", resp.status()));
+    }
+    let downloaded_stamp = {
+        let h = resp.headers();
+        let get = |n: reqwest::header::HeaderName| h.get(n).and_then(|v| v.to_str().ok()).map(str::to_string);
+        get(reqwest::header::ETAG).or_else(|| get(reqwest::header::LAST_MODIFIED))
+    };
+    let total = resp.content_length().unwrap_or(0);
+    let mut bytes = Vec::new();
+    let mut last_report = Instant::now();
+    report_restore(progress, "downloading", 0, total);
+    while let Some(chunk) = resp.chunk().await.map_err(|e| request_error("读取云端备份", e))? {
+        bytes.extend_from_slice(&chunk);
+        if last_report.elapsed() >= Duration::from_millis(100) {
+            report_restore(progress, "downloading", bytes.len() as u64, total);
+            last_report = Instant::now();
+        }
+    }
+    report_restore(progress, "downloading", bytes.len() as u64, total);
+    Ok((bytes, downloaded_stamp))
+}
+
 #[tauri::command]
 pub async fn download_webdav_backup(
     app: AppHandle,
     password: Option<String>,
     state: State<'_, AppState>,
+    on_progress: Channel<RestoreProgress>,
 ) -> Result<serde_json::Value, String> {
     let (url, user, pass) = {
         let conn = state.db.lock().map_err(|e| e.to_string())?;
@@ -587,41 +622,12 @@ pub async fn download_webdav_backup(
     let client = build_client()?;
     let target = backup_target_url(&url);
 
-    let mut req = client.get(&target).timeout(TRANSFER_TIMEOUT);
-    if !user.is_empty() {
-        req = req.basic_auth(&user, Some(&pass));
-    }
-
-    let resp = req
-        .send()
-        .await
-        .map_err(|e| request_error("下载云端备份", e))?;
-
-    if resp.status() == StatusCode::NOT_FOUND {
-        return Err(format!("云端未找到备份文件: {}", REMOTE_BACKUP_FILENAME));
-    }
-    // 恢复后的库里带的是上传方当时的旧标记，这里记下云端当前版本
-    let downloaded_stamp = {
-        let h = resp.headers();
-        let get = |n: reqwest::header::HeaderName| h.get(n).and_then(|v| v.to_str().ok()).map(str::to_string);
-        get(reqwest::header::ETAG).or_else(|| get(reqwest::header::LAST_MODIFIED))
-    };
-
-    if !resp.status().is_success() {
-        return Err(format!(
-            "下载失败，状态码: {} ({})",
-            resp.status(),
-            resp.status().canonical_reason().unwrap_or("未知原因")
-        ));
-    }
-
-    let gz_bytes = resp
-        .bytes()
-        .await
-        .map_err(|e| request_error("读取云端备份", e))?;
-
+    let (gz_bytes, downloaded_stamp) = download_backup(&client, &target, &user, &pass, Some(&on_progress)).await?;
     let restored_len = gz_bytes.len();
-    restore_backup(&app, &gz_bytes, password.as_deref().unwrap_or(""), &state)?;
+    tauri::async_runtime::spawn_blocking(move || {
+        let state = app.state::<AppState>();
+        restore_backup(&app, &gz_bytes, password.as_deref().unwrap_or(""), &state, Some(&on_progress))
+    }).await.map_err(|e| e.to_string())??;
 
     let now_str = Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
     {
@@ -645,6 +651,55 @@ pub async fn download_webdav_backup(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn downloads_report_received_bytes_and_reject_truncated_responses() {
+        for (truncated, known_size) in [(false, true), (false, false), (true, true)] {
+            let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
+            let target = format!("http://{}/backup", listener.local_addr().unwrap());
+            let payload = vec![0x7b; 200_000];
+            let body = payload.clone();
+            let server = std::thread::spawn(move || {
+                let (mut stream, _) = listener.accept().unwrap();
+                stream.set_read_timeout(Some(Duration::from_secs(3))).unwrap();
+                let mut reader = std::io::BufReader::new(stream.try_clone().unwrap());
+                loop {
+                    let mut line = String::new();
+                    std::io::BufRead::read_line(&mut reader, &mut line).unwrap();
+                    if line == "\r\n" || line.is_empty() { break; }
+                }
+                use std::io::Write;
+                write!(stream, "HTTP/1.1 200 OK\r\nETag: test-version\r\nConnection: close\r\n").unwrap();
+                if known_size { write!(stream, "Content-Length: {}\r\n", body.len()).unwrap(); }
+                write!(stream, "\r\n").unwrap();
+                stream.write_all(if truncated { &body[..10] } else { &body }).unwrap();
+            });
+            let reports = std::sync::Arc::new(Mutex::new(Vec::<serde_json::Value>::new()));
+            let captured = reports.clone();
+            let channel = Channel::new(move |body| {
+                if let tauri::ipc::InvokeResponseBody::Json(json) = body {
+                    captured.lock().unwrap().push(serde_json::from_str(&json).unwrap());
+                }
+                Ok(())
+            });
+            let result = tokio::runtime::Builder::new_current_thread().enable_all().build().unwrap()
+                .block_on(download_backup(&build_client().unwrap(), &target, "", "", Some(&channel)));
+            server.join().unwrap();
+            if truncated {
+                assert!(result.is_err());
+            } else {
+                let (bytes, stamp) = result.unwrap();
+                assert_eq!(bytes, payload);
+                assert_eq!(stamp.as_deref(), Some("test-version"));
+                let reports = reports.lock().unwrap();
+                assert_eq!(reports.first().unwrap()["received"], 0);
+                let last = reports.last().unwrap();
+                assert_eq!(last["phase"], "downloading");
+                assert_eq!(last["received"], payload.len() as u64);
+                assert_eq!(last["total"], if known_size { payload.len() as u64 } else { 0 });
+            }
+        }
+    }
 
     #[tokio::test(start_paused = true)]
     async fn upload_watchdog_allows_long_progress_but_bounds_stalls_and_cancellation() {

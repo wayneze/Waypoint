@@ -1,6 +1,6 @@
 // 系统设置：仓库路径、备份、重置点。
-import { ref, watch } from 'vue';
-import { type BackupProgress, type DbInfo, type ObsidianFile, type WebdavStatus } from '../types';
+import { computed, ref, watch } from 'vue';
+import { type BackupProgress, type RestoreProgress, type DbInfo, type ObsidianFile, type WebdavStatus } from '../types';
 import { isTauri, saveSetting } from '../services/api';
 import {
   applyHotkeys,
@@ -57,9 +57,38 @@ export const notifyEventEndEnabled = ref(kvGetJson('waypoint_notify_event_end', 
 // 提醒由后端线程按这些设置发出，键名与 src-tauri/src/cycle.rs 一致
 export const notifyDailyTime = ref(kvGet('waypoint_notify_daily_time') || '20:00');
 export const isExportingDatabase = ref(false);
-export const isImportingDatabase = ref(false);
+const restoreSource = ref<'file' | 'cloud' | 'undo' | null>(null);
+export const isRestoringDatabase = computed(() => restoreSource.value !== null);
+export const isImportingDatabase = computed(() => restoreSource.value === 'file' || restoreSource.value === 'undo');
+export const isDownloadingWebdav = computed(() => restoreSource.value === 'cloud');
+export const restoreProgress = ref<RestoreProgress | null>(null);
+export const restoreError = ref('');
 // Only held for this page operation; never stored in SQLite or browser storage.
 export const backupPassword = ref('');
+
+/** 换库成功后保持锁定，直到新页面重新读取 SQLite；失败和取消才返回旧页面。 */
+async function runDatabaseRestore(
+  source: NonNullable<typeof restoreSource.value>,
+  operation: (onProgress: (progress: RestoreProgress) => void) => Promise<boolean>,
+) {
+  if (!isTauri() || backupBusy.value) return;
+  restoreSource.value = source;
+  restoreError.value = '';
+  restoreProgress.value = null;
+  try {
+    if (!await operation(progress => { restoreProgress.value = progress; })) {
+      restoreSource.value = null;
+      return;
+    }
+    backupPassword.value = '';
+    restoreProgress.value = { phase: 'reloading', received: 0, total: 0 };
+    window.location.reload();
+  } catch (error) {
+    restoreError.value = describeError(error).message;
+    restoreSource.value = null;
+    showToast('恢复失败', restoreError.value, { persistent: true });
+  }
+}
 
 function requireBackupPassword(): string {
   if ([...backupPassword.value].length < 10) {
@@ -134,28 +163,20 @@ export async function handleImportDatabase() {
     showToast('仅桌面端', '浏览器调试没有同一份 SQLite，请用桌面窗口导入');
     return;
   }
-  if (isImportingDatabase.value) return;
-  isImportingDatabase.value = true;
-  try {
+  await runDatabaseRestore('file', async onProgress => {
     const src = await pickOpenFile(
       '导入 Waypoint 备份',
       'Waypoint 备份 (*.wpbak;*.db;*.gz)|*.wpbak;*.db;*.gz|所有文件 (*.*)|*.*'
     );
-    if (!src) return;
+    if (!src) return false;
     await Promise.all([kvFlush(), progressFlush()]);
-    await importDatabase(src, backupPassword.value);
-    backupPassword.value = '';
-    showToast('已导入数据库', '正在重新加载…');
-    window.setTimeout(() => window.location.reload(), 400);
-  } catch (err: any) {
-    showToast('导入失败', (err ? describeError(err).message : '备份无法替换当前数据库'));
-  } finally {
-    isImportingDatabase.value = false;
-  }
+    await importDatabase(src, backupPassword.value, onProgress);
+    return true;
+  });
 }
 
 export async function handleUndoRestore() {
-  if (!isTauri() || isImportingDatabase.value) return;
+  if (!isTauri() || backupBusy.value) return;
   const at = dbInfo.value?.undo_restore_at;
   if (!at || !await askConfirmation({
     title: '撤销上次恢复？',
@@ -163,17 +184,11 @@ export async function handleUndoRestore() {
     confirmLabel: '撤销恢复',
     details: [{ label: '恢复前快照', value: formatConfirmationTime(at, '时间未知') }],
   })) return;
-  isImportingDatabase.value = true;
-  try {
+  await runDatabaseRestore('undo', async onProgress => {
     await Promise.all([kvFlush(), progressFlush()]);
-    await undoLastRestore();
-    showToast('已撤销恢复', '正在重新加载…');
-    window.setTimeout(() => window.location.reload(), 400);
-  } catch (err: any) {
-    showToast('撤销失败', (err ? describeError(err).message : '回滚点无法换回'));
-  } finally {
-    isImportingDatabase.value = false;
-  }
+    await undoLastRestore(onProgress);
+    return true;
+  });
 }
 
 // 选择本地 Obsidian 文件夹
@@ -242,7 +257,7 @@ export const webdavPassword = ref('');
 export const webdavStatus = ref<WebdavStatus | null>(null);
 export const isTestingWebdav = ref(false);
 export const isUploadingWebdav = ref(false);
-export const isDownloadingWebdav = ref(false);
+export const backupBusy = computed(() => isExportingDatabase.value || isUploadingWebdav.value || isRestoringDatabase.value);
 export const webdavTestResult = ref<{ ok: boolean; message: string } | null>(null);
 export const webdavUploadProgress = ref<BackupProgress | null>(null);
 export const webdavUploadResult = ref<{ ok: boolean; message: string } | null>(null);
@@ -365,19 +380,9 @@ export async function handleUploadWebdav() {
 }
 
 export async function handleDownloadWebdav() {
-  if (!isTauri()) return;
-  if (isDownloadingWebdav.value) return;
-  isDownloadingWebdav.value = true;
-  try {
+  await runDatabaseRestore('cloud', async onProgress => {
     await Promise.all([kvFlush(), progressFlush()]);
-    const res = await downloadWebdavBackup(backupPassword.value);
-    backupPassword.value = '';
-    const sizeKb = res.restored_size ? (res.restored_size / 1024).toFixed(1) : '?';
-    showToast('云端数据库已恢复', `备份 ${sizeKb} KB，账号已验证可读，正在重新加载…`);
-    window.setTimeout(() => window.location.reload(), 400);
-  } catch (err: any) {
-    showToast('下载恢复失败', (err ? describeError(err).message : '云端文件不存在或解析失败'));
-  } finally {
-    isDownloadingWebdav.value = false;
-  }
+    await downloadWebdavBackup(backupPassword.value, onProgress);
+    return true;
+  });
 }

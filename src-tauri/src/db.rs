@@ -1,10 +1,23 @@
 use std::path::{Path, PathBuf};
 use std::sync::Mutex;
 use std::io::Write;
-use tauri::{AppHandle, Manager, State};
+use tauri::{ipc::Channel, AppHandle, Manager, State};
 use crate::AppState;
 #[cfg(test)]
 use crate::init_database;
+
+#[derive(Clone, serde::Serialize)]
+pub struct RestoreProgress {
+    phase: &'static str,
+    received: u64,
+    total: u64,
+}
+
+pub(crate) fn report_restore(channel: Option<&Channel<RestoreProgress>>, phase: &'static str, received: u64, total: u64) {
+    if let Some(channel) = channel {
+        let _ = channel.send(RestoreProgress { phase, received, total });
+    }
+}
 
 // Tauri Commands: 获取本地 SQLite 数据库物理存储状态
 #[tauri::command]
@@ -83,22 +96,24 @@ fn undo_path(app: &AppHandle) -> Result<PathBuf, String> {
 
 /// 用 `src` 替换当前库。顺序：先在临时文件里验证并迁移新库，再给当前库留回滚点
 /// `waypoint.db.before-restore`，最后换文件；任何一步失败都回到原库。
-pub(crate) fn restore_backup(app: &AppHandle, bytes: &[u8], password: &str, state: &State<AppState>) -> Result<(), String> {
+pub(crate) fn restore_backup(app: &AppHandle, bytes: &[u8], password: &str, state: &State<AppState>, progress: Option<&Channel<RestoreProgress>>) -> Result<(), String> {
+    report_restore(progress, "decrypting", 0, 0);
     let contents = crate::backup::decode(bytes, password)?;
     let conn = crate::backup::open_bytes(&contents.database)?;
-    replace_db_connection(&db_file_path(app)?, &conn, &state.db, &contents.images)
+    replace_db_connection(&db_file_path(app)?, &conn, &state.db, &contents.images, progress)
 }
 
-fn replace_db_file(dest: &Path, src: &Path, db: &Mutex<rusqlite::Connection>) -> Result<(), String> {
+fn replace_db_file(dest: &Path, src: &Path, db: &Mutex<rusqlite::Connection>, progress: Option<&Channel<RestoreProgress>>) -> Result<(), String> {
     if !src.exists() {
         return Err("备份文件不存在".into());
     }
     let probe = rusqlite::Connection::open_with_flags(src, rusqlite::OpenFlags::SQLITE_OPEN_READ_ONLY)
         .map_err(|e| format!("无法打开备份: {e}"))?;
-    replace_db_connection(dest, &probe, db, &[])
+    replace_db_connection(dest, &probe, db, &[], progress)
 }
 
-fn replace_db_connection(dest: &Path, source: &rusqlite::Connection, db: &Mutex<rusqlite::Connection>, images: &[(String, Vec<u8>)]) -> Result<(), String> {
+fn replace_db_connection(dest: &Path, source: &rusqlite::Connection, db: &Mutex<rusqlite::Connection>, images: &[(String, Vec<u8>)], progress: Option<&Channel<RestoreProgress>>) -> Result<(), String> {
+    report_restore(progress, "validating", 0, 0);
     let mut guard = db.lock().map_err(|e| e.to_string())?;
     if crate::playtime::has_active(&guard)? { return Err("游戏正在计时，请退出游戏后再恢复备份".into()); }
     let probe = crate::backup::snapshot(source)?;
@@ -158,10 +173,12 @@ fn replace_db_connection(dest: &Path, source: &rusqlite::Connection, db: &Mutex<
     }
 
     let undo = sidecar(dest, ".before-restore");
+    report_restore(progress, "saving_undo", 0, 0);
     if let Err(e) = snapshot_db(&guard, &undo) {
         remove_db_files(&staged);
         return Err(e);
     }
+    report_restore(progress, "replacing", 0, 0);
     *guard = rusqlite::Connection::open_in_memory().map_err(|e| e.to_string())?;
 
     remove_db_files(dest);
@@ -185,27 +202,35 @@ fn replace_db_connection(dest: &Path, source: &rusqlite::Connection, db: &Mutex<
 }
 
 #[tauri::command]
-pub fn import_database(app: AppHandle, src_path: String, password: Option<String>, state: State<AppState>) -> Result<(), String> {
-    let src = PathBuf::from(&src_path);
-    let bytes = std::fs::read(&src).map_err(|e| e.to_string())?;
-    if bytes.starts_with(b"SQLite format 3\0") {
-        return replace_db_file(&db_file_path(&app)?, &src, &state.db);
-    }
-    restore_backup(&app, &bytes, password.as_deref().unwrap_or(""), &state)
+pub async fn import_database(app: AppHandle, src_path: String, password: Option<String>, on_progress: Channel<RestoreProgress>) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        report_restore(Some(&on_progress), "reading", 0, 0);
+        let src = PathBuf::from(&src_path);
+        let bytes = std::fs::read(&src).map_err(|e| e.to_string())?;
+        let state = app.state::<AppState>();
+        if bytes.starts_with(b"SQLite format 3\0") {
+            return replace_db_file(&db_file_path(&app)?, &src, &state.db, Some(&on_progress));
+        }
+        restore_backup(&app, &bytes, password.as_deref().unwrap_or(""), &state, Some(&on_progress))
+    }).await.map_err(|e| e.to_string())?
 }
 
 /// 撤销上次导入/恢复：换回 `before-restore` 快照。撤销本身也会留下新的回滚点，可以再撤回来。
 #[tauri::command]
-pub fn undo_last_restore(app: AppHandle, state: State<AppState>) -> Result<(), String> {
-    let undo = undo_path(&app)?;
-    if !undo.exists() {
-        return Err("没有可撤销的恢复记录".into());
-    }
-    let held = sidecar(&undo, ".src");
-    std::fs::copy(&undo, &held).map_err(|e| format!("读取回滚点失败: {}", e))?;
-    let res = replace_db_file(&db_file_path(&app)?, &held, &state.db);
-    remove_db_files(&held);
-    res
+pub async fn undo_last_restore(app: AppHandle, on_progress: Channel<RestoreProgress>) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        report_restore(Some(&on_progress), "reading", 0, 0);
+        let undo = undo_path(&app)?;
+        if !undo.exists() {
+            return Err("没有可撤销的恢复记录".into());
+        }
+        let held = sidecar(&undo, ".src");
+        std::fs::copy(&undo, &held).map_err(|e| format!("读取回滚点失败: {}", e))?;
+        let state = app.state::<AppState>();
+        let res = replace_db_file(&db_file_path(&app)?, &held, &state.db, Some(&on_progress));
+        remove_db_files(&held);
+        res
+    }).await.map_err(|e| e.to_string())?
 }
 
 #[cfg(test)]
@@ -216,6 +241,7 @@ mod tests {
         let conn = rusqlite::Connection::open(path).unwrap();
         init_database(&conn).unwrap();
         conn.execute("INSERT OR REPLACE INTO app_settings (key, value) VALUES ('k', ?1)", [value]).unwrap();
+        conn.execute("INSERT INTO game_records (id,title,category,status,progress) VALUES (?1,?1,'single','playing','')", [value]).unwrap();
         conn
     }
 
@@ -260,23 +286,28 @@ mod tests {
             }
         };
 
-        replace_db_file(&dest, &backup, &db).unwrap();
+        replace_db_file(&dest, &backup, &db, None).unwrap();
         assert_eq!(read_k(&db), "backup");
         assert_local_connections();
+        let record_ids = || crate::records::read_records(&db.lock().unwrap()).unwrap()
+            .into_iter().map(|record| record.id).collect::<Vec<_>>();
+        assert_eq!(record_ids(), vec!["backup"]); // 不是与旧书库合并。
+        assert!(!sidecar(&dest, ".restore-tmp").exists());
 
         // 回滚点是原库；再次替换回去即撤销
         let undo = sidecar(&dest, ".before-restore");
         let held = sidecar(&undo, ".src");
         std::fs::copy(&undo, &held).unwrap();
-        replace_db_file(&dest, &held, &db).unwrap();
+        replace_db_file(&dest, &held, &db, None).unwrap();
         assert_eq!(read_k(&db), "current");
+        assert_eq!(record_ids(), vec!["current"]);
         assert_local_connections();
 
         // A new machine may import the connection address, never another
         // machine's credential or a marker pointing at an unrelated secret.
         let fresh_dest = dir.join("fresh.db");
         let fresh = Mutex::new(db_with(&fresh_dest, "fresh"));
-        replace_db_file(&fresh_dest, &backup, &fresh).unwrap();
+        replace_db_file(&fresh_dest, &backup, &fresh, None).unwrap();
         let fresh_conn = fresh.lock().unwrap();
         assert_eq!(crate::settings::read_app_setting(&fresh_conn, "webdav_url").as_deref(), Some("https://backup.example/dav/"));
         for key in ["webdav_password", "steam_web_api_key"] {
@@ -288,7 +319,7 @@ mod tests {
         // 不是 Waypoint 库：拒绝且原库不动
         let junk = dir.join("junk.db");
         rusqlite::Connection::open(&junk).unwrap().execute("CREATE TABLE x (a)", []).unwrap();
-        assert!(replace_db_file(&dest, &junk, &db).is_err());
+        assert!(replace_db_file(&dest, &junk, &db, None).is_err());
         assert_eq!(read_k(&db), "current");
 
         // A structurally valid foreign DPAPI backup must not replace the current
@@ -297,7 +328,7 @@ mod tests {
         let foreign_conn = db_with(&foreign, "foreign");
         foreign_conn.execute("INSERT INTO vault_items (id,platform,account_name,payload) VALUES ('a','sky','test','dpapi:00')", []).unwrap();
         let undo_before = std::fs::read(&undo).unwrap();
-        assert!(replace_db_file(&dest, &foreign, &db).is_err());
+        assert!(replace_db_file(&dest, &foreign, &db, None).is_err());
         assert_eq!(read_k(&db), "current");
         assert_eq!(std::fs::read(&undo).unwrap(), undo_before);
         drop(foreign_conn);

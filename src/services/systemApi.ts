@@ -1,6 +1,6 @@
 import { Channel, invoke } from "@tauri-apps/api/core";
 import { openUrl } from "@tauri-apps/plugin-opener";
-import type { BackupProgress, ObsidianFile, DbInfo, ObsidianGameGuide, WaypointProjectionSnapshot, WaypointProjectionResult, WebdavConfig, WebdavStatus, WebdavSyncResult } from "../types";
+import type { BackupProgress, RestoreProgress, ObsidianFile, DbInfo, ObsidianGameGuide, WaypointProjectionSnapshot, WaypointProjectionResult, WebdavConfig, WebdavStatus, WebdavSyncResult } from "../types";
 import { isTauri } from "./api";
 
 // 触发原生通知
@@ -253,9 +253,15 @@ export async function exportDatabase(destPath: string, password: string): Promis
   return await invoke<string>("export_database", { destPath, password });
 }
 
-export async function importDatabase(srcPath: string, password = ''): Promise<void> {
+function restoreChannel(onProgress?: (progress: RestoreProgress) => void): Channel<RestoreProgress> {
+  const channel = new Channel<RestoreProgress>();
+  channel.onmessage = progress => onProgress?.(progress);
+  return channel;
+}
+
+export async function importDatabase(srcPath: string, password = '', onProgress?: (progress: RestoreProgress) => void): Promise<void> {
   if (!isTauri()) throw new Error("仅在桌面端可用");
-  await invoke("import_database", { srcPath, password });
+  await invoke("import_database", { srcPath, password, onProgress: restoreChannel(onProgress) });
 }
 
 export interface ActivityStats {
@@ -291,9 +297,9 @@ export async function steamWebApiKeyIsConfigured(): Promise<boolean> {
   return await invoke<boolean>("steam_web_api_key_configured");
 }
 
-export async function undoLastRestore(): Promise<void> {
+export async function undoLastRestore(onProgress?: (progress: RestoreProgress) => void): Promise<void> {
   if (!isTauri()) throw new Error("仅在桌面端可用");
-  await invoke("undo_last_restore");
+  await invoke("undo_last_restore", { onProgress: restoreChannel(onProgress) });
 }
 
 export async function saveWebdavConfig(config: WebdavConfig): Promise<void> {
@@ -338,7 +344,7 @@ export async function cancelWebdavBackup(): Promise<void> {
   await invoke("cancel_webdav_backup");
 }
 
-export async function downloadWebdavBackup(password = ''): Promise<WebdavSyncResult> {
+export async function downloadWebdavBackup(password = '', onProgress?: (progress: RestoreProgress) => void): Promise<WebdavSyncResult> {
   if (!isTauri()) throw new Error("仅在桌面端可用");
-  return await invoke<WebdavSyncResult>("download_webdav_backup", { password });
+  return await invoke<WebdavSyncResult>("download_webdav_backup", { password, onProgress: restoreChannel(onProgress) });
 }

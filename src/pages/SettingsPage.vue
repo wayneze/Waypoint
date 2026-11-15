@@ -44,6 +44,8 @@ import {
   isDownloadingWebdav,
   webdavUploadProgress,
   webdavUploadResult,
+  backupBusy,
+  restoreError,
   isCancellingWebdav,
   handleCancelWebdav,
   handleSaveWebdavConfig,
@@ -104,7 +106,6 @@ const resetGames = computed(() => {
 const steamKeyVisible = computed(() => isGameEnabled('galgame'));
 
 const showWebdavPassword = ref(false);
-const backupBusy = computed(() => isExportingDatabase.value || isImportingDatabase.value || isUploadingWebdav.value || isDownloadingWebdav.value);
 const uploadLabel = computed(() => {
   if (isCancellingWebdav.value) return '正在取消，等待当前步骤结束…';
   const progress = webdavUploadProgress.value;
@@ -139,7 +140,7 @@ function fillWebdavPreset(kind: 'infinicloud' | 'jianguoyun') {
 async function confirmRestoreAndDownload() {
   if (await askConfirmation({
     title: '从云端恢复？',
-    message: '云端备份将替换本机账号、任务、收集进度和设置。恢复前会自动保留本机快照，可以撤销。',
+    message: '云端备份将替换本机账号、任务、收集进度和设置。恢复前会自动保留本机快照，可以撤销。游戏存档需单独备份和恢复。',
     confirmLabel: '覆盖并恢复',
   })) await handleDownloadWebdav();
 }
@@ -252,11 +253,13 @@ async function commitResets() {
     </div>
 
     <div v-show="settingsSection === 'backup'" id="settings-backup" class="settings-content" role="region" aria-label="备份与恢复" tabindex="0">
+      <p v-if="restoreError" role="alert" class="text-sm text-alert break-words select-text">恢复失败：{{ restoreError }}。请检查后重试。</p>
       <section class="settings-section">
         <div class="settings-section-intro"><span class="settings-section-number">01</span><h2>备份密码</h2><p>本地和云端共用一份密码，用于加密整份备份。</p></div>
         <div class="settings-section-body">
           <label class="settings-field" for="backup-password"><span><KeyRound />本次备份或恢复使用的密码</span><input id="backup-password" v-model="backupPassword" type="password" autocomplete="off" aria-describedby="backup-password-help" placeholder="创建至少 10 个字符；恢复时填写原密码" /></label>
           <p id="backup-password-help" class="settings-help">密码不保存、不上传，操作成功后清空。请自行保管，遗失后无法恢复。</p>
+          <p class="settings-help">此处恢复工作台资料和图片。游戏目录、实际游戏存档及其备份文件需单独迁移；恢复时会保留这些文件。</p>
           <details class="settings-disclosure"><summary>备份包含哪些内容？<ChevronDown /></summary><div class="settings-disclosure-body"><p>账号、角色、任务、收集进度、记事、设置，以及已缓存的封面和图标。</p><p>WebDAV 登录密码与 Steam API Key 需在新电脑重新填写。Obsidian 仓库、游戏存档和插件文件需另外迁移。</p><p>旧版 .db / .gz 没有备份密码，可留空；仅在账号能够解密时允许恢复。</p></div></details>
         </div>
       </section>

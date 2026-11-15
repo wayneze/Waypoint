@@ -3,6 +3,7 @@ import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, r
 import { CalendarCheck, ChevronDown, ChevronRight, Database, Keyboard, Minus, Pin, Plus, ScrollText, Settings2, Shield } from '@lucide/vue';
 import CharAvatar from './components/CharAvatar.vue';
 import GameStampIcon from './components/GameStampIcon.vue';
+import DatabaseRestoreStatus from './components/DatabaseRestoreStatus.vue';
 import WorkspaceOverlays from './components/WorkspaceOverlays.vue';
 import { CATALOG_NAV_GAMES, READER_NAV_GAMES, isGameEnabled } from './services/games';
 import {
@@ -31,7 +32,7 @@ import {
 } from './workspace/core';
 import { bootstrapWorkspace } from './workspace/bootstrap';
 import { enabledGameIds, gameMetaOf } from './services/games';
-import { dbInfo, panelHotkey, settingsSection } from './workspace/settings';
+import { dbInfo, panelHotkey, settingsSection, isRestoringDatabase } from './workspace/settings';
 import { jx3ApiStatus } from './workspace/jx3/calendar';
 import { memoPendingCount } from './workspace/memos';
 import { singleAndGalgameGuides } from './workspace/guides/library';
@@ -242,7 +243,7 @@ onBeforeUnmount(() => {
     <!-- 主体容器 (高度自适应 100% 视口，无多余外层滚动条) -->
     <div class="flex-1 min-h-0 min-w-0 flex overflow-hidden">
       
-      <aside class="wp-sidebar" :class="{ 'is-collapsed': isSidebarCollapsed }" aria-label="工作台侧栏">
+      <aside class="wp-sidebar" :inert="isRestoringDatabase" :class="{ 'is-collapsed': isSidebarCollapsed }" aria-label="工作台侧栏">
         <button type="button" class="wp-sidebar-edge"
           :aria-label="isSidebarCollapsed ? '展开侧栏' : '收起侧栏'"
           :aria-expanded="!isSidebarCollapsed" aria-controls="wp-main-navigation"
@@ -321,7 +322,8 @@ onBeforeUnmount(() => {
       </Teleport>
 
       <main class="flex-1 min-w-0 h-full overflow-y-auto bg-canvas" :class="['daily', 'memo', 'jx3', 'sky', 'galgame', 'vault', 'settings'].includes(currentTab) ? 'wp-workspace-main' : 'p-3 sm:p-4'">
-        <DailyPage v-if="currentTab === 'daily'" />
+        <DatabaseRestoreStatus v-if="isRestoringDatabase" />
+        <DailyPage v-else-if="currentTab === 'daily'" />
         <Jx3Page v-else-if="currentTab === 'jx3'" />
         <CollectionPage v-else-if="currentTab === 'sky'" />
         <MemoPage v-else-if="currentTab === 'memo'" />
@@ -331,7 +333,7 @@ onBeforeUnmount(() => {
       </main>
     </div>
 
-    <footer class="wp-statusbar" aria-label="工作台状态与显示">
+    <footer class="wp-statusbar" :inert="isRestoringDatabase" aria-label="工作台状态与显示">
       <details ref="statusDetailsRef" class="wp-status-details">
         <summary class="wp-status-trigger" title="查看资料与连接状态">
           <Database /><span>本地资料</span>
