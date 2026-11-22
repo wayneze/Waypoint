@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue';
 import { setSkyGuideItems } from '../../services/skyCollection';
 import { saveCollection } from './collection';
-import { getTodayDateStr } from '../../services/skyDailyService';
+import { beijingDay } from '../../services/cycleReset';
 import { currentSkyPeriods, periodKey, skyActivityDailies, skyPeriodGoals, skyTodoGroups, type SkyPeriodGoal, type SkyTodoGroup, type SkyTodoItem } from '../../services/skyPlan';
 import { progressGet, setCharacterDailyChecks, setProgressEntries } from '../../services/progress';
 import type { SkyCalendarItem } from '../../services/skyApi';
@@ -11,7 +11,7 @@ import { skyCalendarFeed, skyDailyData } from './tabs';
 
 export const skyPlanDay = computed(() => {
   void skyShard.value;
-  return getTodayDateStr();
+  return beijingDay();
 });
 export function skyGroupsFor(characterId: string) {
   return skyTodoGroups(skyDailyData.value, skyCalendarFeed.value, skyPlanDay.value, characterId, state.eventGuides);

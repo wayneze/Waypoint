@@ -855,6 +855,24 @@ fn sky_event_fandom_matches_by_langlink_or_unique_dates() {
         })),
         vec!["https://wx3.sinaimg.cn/mw2000/006W8ZMely1ih6i61nlh3j30rs4orhdw.jpg".to_string()]
     );
+    assert_eq!(
+        parse_weibo_created_at("Sat Nov 21 08:30:00 +0800 2026"),
+        chrono::NaiveDate::from_ymd_opt(2026, 11, 21)
+    );
+    assert_eq!(
+        parse_weibo_created_at("Fri Nov 20 23:59:00 +0800 2026"),
+        chrono::NaiveDate::from_ymd_opt(2026, 11, 20)
+    );
+    assert_eq!(
+        weibo_numbered_images(&serde_json::json!({
+            "pic_ids": ["image0002", null, "image0001"],
+            "pic_infos": {
+                "image0001": {"large": {"url": "https://wx1.sinaimg.cn/large/1.jpg"}},
+                "image0002": {"large": {"url": "https://wx1.sinaimg.cn/large/2.jpg"}}
+            }
+        })),
+        ["https://wx1.sinaimg.cn/mw2000/2.jpg", "", "https://wx1.sinaimg.cn/mw2000/1.jpg"]
+    );
     let promo_post = weibo_event_from_mblog(&serde_json::json!({
         "text": "#光遇我的世界联动# 宣传图",
         "pics": [{"large": {"url": "https://wx3.sinaimg.cn/large/Sky-x-Minecraft-Promo.jpg"}}]

@@ -166,7 +166,7 @@ pub(crate) fn parse_season_page(title: &str, url: &str, wt: &str, start: &str, e
 #[tauri::command]
 pub async fn fetch_sky_seasons() -> Result<SkySeasonCatalog, String> {
     let client = sky_http_client()?;
-    let today = chrono::Local::now().date_naive();
+    let today = super::beijing_today();
     let ask_val = wiki_ask(
         &client,
         "[[分类:奇妙之旅]]|?开启时间|?结束时间|sort=开启时间|order=desc|limit=50",

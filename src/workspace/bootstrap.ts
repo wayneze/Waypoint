@@ -2,7 +2,6 @@
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
 import { type CustomMemo, type TaskItem, type WaypointProjectionScope, type WaypointProjectionSnapshot } from '../types';
-import { getTodayDateStr } from '../services/skyDailyService';
 import {
   getAllTasks,
   getCustomMemos,
@@ -219,36 +218,23 @@ export async function loadAllTasks() {
   }
 }
 
-let lastSkyRetryAt = 0;
+let lastConnectedSkyCatalogRefreshAt = 0;
 
-async function refreshSkyDailyIfStale() {
-  if (!isGameEnabled('sky')) return false;
-  const { refreshSkyDaily, refreshSkyNews, skyDailyData } = await loadSky();
-  const today = getTodayDateStr();
-  const shown = skyDailyData.value?.dateStr;
-  const stale = shown != null && shown !== today;
-  const retry = !!skyDailyData.value?.isFallback;
-  if (!stale && !retry) return false;
-  if (retry && !stale && Date.now() - lastSkyRetryAt < 15 * 60 * 1000) return false;
-  lastSkyRetryAt = Date.now();
-  await refreshSkyDaily(false);
-  if (stale) void refreshSkyNews(false);
-  return stale && skyDailyData.value?.dateStr === today && !skyDailyData.value?.isFallback;
-}
-
-// 日课换日由后端执行（窗口没开也照常），这里只做前端自己的那部分：记事周期和光遇今日图文。
-let cycleTickBusy = false;
-export async function applyCycleResets(now = new Date()) {
-  if (cycleTickBusy) return;
-  cycleTickBusy = true;
-  try {
-    checkMemoIntervalResets(now);
-    if (await refreshSkyDailyIfStale()) {
-      const { skyDailyData } = await loadSky();
-      if (skyDailyData.value) showToast('光遇今日已换日', skyDailyData.value.dateStr);
-    }
-  } finally {
-    cycleTickBusy = false;
+function refreshWorkspaceClock() {
+  checkMemoIntervalResets();
+  if (document.visibilityState !== 'visible') return;
+  if (isGameEnabled('jx3')) {
+    void syncJx3DailyCalendar();
+    void refreshJx3MapEvents();
+  }
+  if (isGameEnabled('sky')) {
+    void loadSky().then(({ ensureSkyCatalogs, refreshSkyDaily }) => {
+      if (Date.now() - lastConnectedSkyCatalogRefreshAt >= 15 * 60_000) {
+        lastConnectedSkyCatalogRefreshAt = Date.now();
+        return ensureSkyCatalogs();
+      }
+      return refreshSkyDaily(false);
+    });
   }
 }
 
@@ -374,11 +360,12 @@ export async function bootstrapWorkspace() {
       currentTab.value = event.payload === 'today' ? 'daily' : event.payload;
       selectedScope.value = 'all';
     });
-    setInterval(() => { applyCycleResets(); }, 60000);
+    setInterval(refreshWorkspaceClock, 60000);
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') applyCycleResets();
+      if (document.visibilityState === 'visible') refreshWorkspaceClock();
     });
-    window.addEventListener('focus', () => { applyCycleResets(); });
+    window.addEventListener('focus', refreshWorkspaceClock);
+    window.addEventListener('online', refreshWorkspaceClock);
 
     // 光遇落石、剑三世界首领倒计时（每 30 秒刷新）
     setInterval(() => {
@@ -394,10 +381,7 @@ export async function bootstrapWorkspace() {
   }
 
   const skyDailyP = isGameEnabled('sky')
-    ? loadSky().then(({ refreshSkyDaily, ensureSkyCatalogs }) => {
-      ensureSkyCatalogs();
-      return refreshSkyDaily(false);
-    })
+    ? loadSky().then(({ ensureSkyCatalogs }) => ensureSkyCatalogs())
     : Promise.resolve();
-  await Promise.all([loadObsidianGuides(), skyDailyP, applyCycleResets()]);
+  await Promise.all([loadObsidianGuides(), skyDailyP]);
 }

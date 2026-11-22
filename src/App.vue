@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { version } from '../package.json';
 import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { CalendarCheck, ChevronDown, ChevronRight, Database, Keyboard, Minus, Pin, Plus, ScrollText, Settings2, Shield } from '@lucide/vue';
 import CharAvatar from './components/CharAvatar.vue';
@@ -341,7 +342,7 @@ onBeforeUnmount(() => {
           <ChevronDown class="wp-status-chevron" />
         </summary>
         <div class="wp-status-popover">
-          <div class="wp-status-popover-heading"><span>工作台状态</span><span class="font-mono">v0.1.0</span></div>
+          <div class="wp-status-popover-heading"><span>工作台状态</span><span class="font-mono">v{{ version }}</span></div>
           <dl>
             <div><dt>本地数据库</dt><dd>{{ dbInfo ? '可用' : '尚未读取' }}</dd></div>
             <div v-if="dbInfo"><dt>资料大小</dt><dd>{{ Math.round(dbInfo.size_bytes / 1024).toLocaleString() }} KB</dd></div>

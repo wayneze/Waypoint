@@ -276,8 +276,8 @@ pub(crate) fn parse_weixin_article(html: &str, url: &str) -> Option<SkyCalendarI
         images,
     )?;
     let blob = format!("{} {}", title, strip_html_text(head));
-    if let Some((start, end)) = parse_cn_notice_window(&blob, chrono::Local::now().date_naive()) {
-        let status = event_window_status(Some(start), end, chrono::Local::now().date_naive());
+    if let Some((start, end)) = parse_cn_notice_window(&blob, super::super::beijing_today()) {
+        let status = event_window_status(Some(start), end, super::super::beijing_today());
         if status == "live" || status == "upcoming" {
             item.start = ymd(start);
             item.end = end.map(ymd).unwrap_or_default();
@@ -511,7 +511,7 @@ pub(crate) async fn discover_weixin_article_urls() -> Vec<String> {
     for kind in ["26689", "26690", "26691"] {
         for start in [1u32, 21, 41] {
             for row in sixhorse_news_page(&client, kind, start, "").await {
-                if keep_cn_notice_for_year(&row, chrono::Local::now().date_naive()) {
+                if keep_cn_notice_for_year(&row, super::super::beijing_today()) {
                     blobs.push(sixhorse_row_blob(&row));
                 }
             }

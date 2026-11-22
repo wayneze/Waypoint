@@ -28,6 +28,10 @@ pub struct SkyBoostFeedback {
     pub status: String,
     pub completed: bool,
     pub order_state: String,
+    pub days: Option<i64>,
+    pub expiration_date: Option<String>,
+    pub start_time: Option<String>,
+    pub done_time: Option<String>,
     pub assets: SkyBoostAssets,
 }
 
@@ -142,12 +146,22 @@ fn parse_feedback(value: &Value, fetched_at: chrono::DateTime<FixedOffset>) -> R
     let status = data["todayState"].as_str().filter(|s| !s.is_empty())
         .ok_or("反馈缺少今日完成状态，本地记录未改动")?;
     let order_state = data["state"].as_str().ok_or("反馈缺少订单状态")?;
+    let order_text = |field: &str| {
+        data[field].as_str().map(str::trim)
+            .filter(|value| !value.is_empty() && value.chars().count() <= 64)
+            .map(str::to_string)
+    };
     Ok(SkyBoostFeedback {
         day: fetched_at.format("%Y-%m-%d").to_string(),
         fetched_at: fetched_at.to_rfc3339(),
         status: status.to_string(),
         completed: status == "今日代练已完成" && order_state == "正常",
         order_state: order_state.to_string(),
+        days: data["days"].as_i64()
+            .or_else(|| data["days"].as_str().and_then(|value| value.parse().ok())),
+        expiration_date: order_text("expirationDate"),
+        start_time: order_text("startTime"),
+        done_time: order_text("doneTime"),
         assets: parse_assets(data),
     })
 }
@@ -166,7 +180,9 @@ pub async fn fetch_sky_boost_feedback(link: String) -> Result<SkyBoostFeedback, 
         .build().map_err(|_| "无法建立反馈连接")?;
     let response = client.post("http://dp.mz997.com:8006/Self/queryOrder")
         .header("X-ENC", "2").header("X-KEY", key).header("X-TS", ts.to_string())
-        .json(&body).send().await.map_err(|_| "反馈连接失败，稍后可重试")?;
+        .json(&body).send().await.map_err(|error| {
+            if error.is_timeout() { "代练平台响应超时，稍后可手动刷新" } else { "反馈连接失败，稍后可重试" }
+        })?;
     if !response.status().is_success() { return Err("代练平台暂不可用".into()); }
     let value: Value = response.json().await.map_err(|_| "反馈格式已变化，本地记录未改动")?;
     let fetched = Utc::now().with_timezone(&offset);
@@ -191,6 +207,11 @@ mod tests {
             assert_eq!(parse_feedback(&value, now).unwrap().completed, done);
         }
         assert!(parse_feedback(&serde_json::json!({"code":200,"data":{}}), now).is_err());
+        let details = parse_feedback(&serde_json::json!({"code":200,"data":{
+            "todayState":"跑手正在号上代练","state":"正常","days":"3","expirationDate":"2026-11-24"
+        }}), now).unwrap();
+        assert_eq!(details.days, Some(3));
+        assert_eq!(details.expiration_date.as_deref(), Some("2026-11-24"));
         assert!(mz_order("http://localhost:92/#/order-search?order=test").is_err());
         assert!(mz_order("http://dp.mz997.com:92/#/order-search?order=test&order=other").is_err());
     }

@@ -40,6 +40,29 @@ pub(crate) fn weibo_push_image(out: &mut Vec<String>, url: &str) {
     out.push(large);
 }
 
+/// 每日攻略的“图 N”引用原始位置，不能去重或在缺图时把后面的图提前。
+pub(crate) fn weibo_numbered_images(mblog: &serde_json::Value) -> Vec<String> {
+    fn picture_url(pic: &serde_json::Value) -> Option<String> {
+        ["/largest/url", "/large/url", "/mw2000/url", "/url"]
+            .into_iter()
+            .filter_map(|path| pic.pointer(path).and_then(|value| value.as_str()))
+            .find(|url| url.starts_with("https://") || url.starts_with("http://"))
+            .map(weibo_large_image)
+    }
+    let pics = mblog.get("pics").and_then(|value| value.as_array());
+    if let Some(ids) = mblog.get("pic_ids").and_then(|value| value.as_array()).filter(|ids| !ids.is_empty()) {
+        return ids.iter().map(|id| {
+            let Some(id) = id.as_str() else { return String::new() };
+            mblog["pic_infos"].get(id).and_then(picture_url)
+                .or_else(|| pics.and_then(|pics| pics.iter().find(|pic| pic["pid"].as_str() == Some(id))).and_then(picture_url))
+                .or_else(|| (id.len() >= 8 && id.bytes().all(|b| b.is_ascii_alphanumeric()))
+                    .then(|| format!("https://wx1.sinaimg.cn/mw2000/{id}.jpg")))
+                .unwrap_or_default()
+        }).collect();
+    }
+    pics.into_iter().flatten().map(|pic| picture_url(pic).unwrap_or_default()).collect()
+}
+
 pub(crate) fn weibo_mblog_images(mblog: &serde_json::Value) -> Vec<String> {
     let mut out = Vec::new();
     if let Some(pics) = mblog.get("pics").and_then(|p| p.as_array()) {
@@ -84,8 +107,8 @@ pub(crate) fn weibo_mblog_images(mblog: &serde_json::Value) -> Vec<String> {
 
 pub(crate) fn parse_weibo_created_at(raw: &str) -> Option<chrono::NaiveDate> {
     let t = raw.trim();
-    if t.len() >= 10 {
-        if let Ok(date) = chrono::NaiveDate::parse_from_str(&t[..10], "%Y-%m-%d") {
+    if let Some(prefix) = t.get(..10) {
+        if let Ok(date) = chrono::NaiveDate::parse_from_str(prefix, "%Y-%m-%d") {
             return Some(date);
         }
     }

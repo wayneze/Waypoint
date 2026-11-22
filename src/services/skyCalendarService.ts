@@ -1,4 +1,4 @@
-import { getTodayDateStr as todayStr } from './skyDailyService';
+import { beijingDay as todayStr } from './cycleReset';
 /**
  * 光遇档期：当前季节 / 国服回归先祖 / 国际服已公告回归。
  * 名字只来自 wiki 复刻项；国服空档可展示未点名窗口，国际服只展示已点名档期。
@@ -82,7 +82,7 @@ export async function getSkyCalendarFeed(
     key: CACHE_KEY,
     label: '光遇档期',
     fetch: fetchSkyCalendar,
-    fresh: data => data.as_of === todayStr(),
+    fresh: (data, at) => data.as_of === todayStr() && Date.now() - at < 15 * 60_000,
     valid: feedHasRows,
     warn: data => (data.warnings || []).join('；'),
     onUpdate: next => onUpdate?.(sanitizeFeed(next)),

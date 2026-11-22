@@ -30,7 +30,7 @@ Windows 桌面游戏工作台，集中管理多角色日课、光遇收集、剑
 Windows x64 构建产物：
 
 - `src-tauri/target/release/waypoint.exe`：直接运行。
-- `src-tauri/target/release/bundle/nsis/Waypoint_0.1.0_x64-setup.exe`：安装包。
+- `src-tauri/target/release/bundle/nsis/Waypoint_<版本>_x64-setup.exe`：安装包。
 
 首次安装没有演示账号、角色、任务或私人攻略。关闭主窗口会最小化到托盘，彻底退出请使用托盘菜单。
 

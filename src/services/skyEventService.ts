@@ -1,4 +1,4 @@
-import { getTodayDateStr as todayStr } from './skyDailyService';
+import { beijingDay as todayStr } from './cycleReset';
 /**
  * 光遇节日页目录：wiki 节日活动名单，每种节日只留最新一届。
  * 打卡只存在本地，不写回 wiki。
@@ -123,7 +123,7 @@ export async function getSkyEventCatalog(
     key: CACHE_KEY,
     label: '光遇节日目录',
     fetch: fetchSkyEvents,
-    fresh: data => data.as_of === todayStr(),
+    fresh: (data, at) => data.as_of === todayStr() && Date.now() - at < 60 * 60_000,
     valid: data => Array.isArray(data.events) && data.events.length > 0,
     onUpdate,
     force

@@ -1,4 +1,4 @@
-import { getTodayDateStr as todayStr } from './skyDailyService';
+import { beijingDay as todayStr } from './cycleReset';
 /**
  * 光遇季节页目录：wiki 奇妙之旅名单 + 向导树种类/近季价格。
  * 打卡与心愿只存在本地，不写回 wiki。
@@ -92,7 +92,7 @@ export async function getSkySeasonCatalog(
     key: CACHE_KEY,
     label: '光遇季节目录',
     fetch: fetchSkySeasons,
-    fresh: data => data.as_of === todayStr(),
+    fresh: (data, at) => data.as_of === todayStr() && Date.now() - at < 60 * 60_000,
     valid: data => Array.isArray(data.seasons) && data.seasons.length > 0,
     onUpdate,
     force

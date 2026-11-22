@@ -4,6 +4,7 @@ import { kvGetJson, kvSetConfirmed } from './kv';
 import { completeSkyDailySelection, type SkyDailyGuidePayload, type SkyDailySelection, type SkyEventDaily } from './skyDailyService';
 import type { SkyBoostAssets } from './skyInventory';
 import { progressGet, setProgressEntries } from './progress';
+import { beijingDay } from './cycleReset';
 
 export interface SkyBoostBinding {
   link: string;
@@ -16,6 +17,10 @@ export interface SkyBoostFeedback {
   status: string;
   completed: boolean;
   order_state: string;
+  days?: number | null;
+  expiration_date?: string | null;
+  start_time?: string | null;
+  done_time?: string | null;
   assets?: SkyBoostAssets;
 }
 export interface SkyBoostCompletion {
@@ -24,6 +29,7 @@ export interface SkyBoostCompletion {
   feedback: Omit<SkyBoostFeedback, 'assets'>;
   message: string;
 }
+type SkyBoostLatest = Omit<SkyBoostCompletion, 'included'>;
 export const SKY_BOOST_OPTIONS = [
   { key: 'quests', label: '每日四任务' },
   { key: 'candles', label: '季节蜡烛' },
@@ -68,12 +74,8 @@ export async function fetchSkyBoostFeedback(link: string): Promise<SkyBoostFeedb
   return invoke<SkyBoostFeedback>('fetch_sky_boost_feedback', { link });
 }
 
-export function skyBoostDay(now = new Date()): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
-}
-
 /** 完成记录按角色、订单、套餐和国服日期隔离；重开应用后仍可停止当天轮询。 */
-export function loadSkyBoostCompletion(characterId: string, binding: SkyBoostBinding, day = skyBoostDay()) {
+export function loadSkyBoostCompletion(characterId: string, binding: SkyBoostBinding, day = beijingDay()) {
   const record = progressGet<SkyBoostCompletion>('sky.boost_sync', 'completed', characterId);
   return record?.feedback.day === day && record.link === binding.link
     && SKY_BOOST_OPTIONS.every(({ key }) => record.included[key] === binding.included[key])
@@ -87,15 +89,43 @@ export function saveSkyBoostCompletion(characterId: string, binding: SkyBoostBin
   } satisfies SkyBoostCompletion]], characterId);
 }
 
+export function loadSkyBoostLatest(characterId: string, binding: SkyBoostBinding) {
+  const record = progressGet<SkyBoostLatest>('sky.boost_sync', 'latest', characterId);
+  return record?.link === binding.link ? record : undefined;
+}
+
+export function saveSkyBoostLatest(characterId: string, binding: SkyBoostBinding, feedback: SkyBoostFeedback, message: string) {
+  const { assets: _assets, ...status } = feedback;
+  return setProgressEntries('sky.boost_sync', [['latest', {
+    link: binding.link, feedback: status, message,
+  } satisfies SkyBoostLatest]], characterId);
+}
+
+export function skyBoostExpired(feedback: SkyBoostFeedback, now = new Date()): boolean {
+  if (/^(?:订单)?(?:已?过期|已到期|已结束)$/.test(feedback.order_state.trim())) return true;
+  const match = feedback.expiration_date?.trim().match(
+    /^(\d{4})(?:[-/.]|年)(\d{1,2})(?:[-/.]|月)(\d{1,2})(?:日)?(?:[ T](\d{1,2}):(\d{2})(?::(\d{2}))?(Z|[+-]\d{2}:?\d{2})?)?$/,
+  );
+  if (!match) return false;
+  const expirationDay = `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`;
+  const date = new Date(`${expirationDay}T00:00:00Z`);
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== expirationDay) return false;
+  if (match[4]) {
+    const expirationTime = `${expirationDay}T${match[4].padStart(2, '0')}:${match[5]}:${match[6] || '00'}${match[7] || '+08:00'}`;
+    return Date.parse(expirationTime) <= now.getTime();
+  }
+  return expirationDay < beijingDay(now);
+}
+
 /** 仅接受本次查询的当天明确完成状态；范围由用户保存的订单服务项目决定。 */
 export async function applySkyBoostFeedback(
   payload: SkyDailyGuidePayload, characterId: string, binding: SkyBoostBinding,
   feedback: SkyBoostFeedback, now = new Date(),
   events?: SkyEventDaily[],
 ): Promise<boolean> {
-  const day = skyBoostDay(now);
+  const day = beijingDay(now);
   const age = now.getTime() - Date.parse(feedback.fetched_at);
-  if (!feedback.completed || feedback.order_state !== '正常') return false;
+  if (!feedback.completed || feedback.order_state !== '正常' || skyBoostExpired(feedback, now)) return false;
   if (feedback.day !== day || payload.dateStr !== day || !Number.isFinite(age) || age < -60_000 || age > 120_000) {
     throw new Error('反馈或日常日期不匹配，请刷新后重试');
   }

@@ -16,6 +16,7 @@ import { parseAchievementSearchPayload } from '../../services/jx3AdventureCatalo
 import { kvGet, kvSet } from '../../services/kv';
 import { reportSource } from '../../services/fetchCache';
 import { isGameEnabled } from '../../services/games';
+import { beijingDay } from '../../services/cycleReset';
 import {
   JX3_CALENDAR_SLOTS,
   jx3CalendarCategoryImage,
@@ -409,7 +410,7 @@ async function collectJx3WorldBossWeek(today: { date: string; leader?: string[] 
     const offset = daysUntilJx3Weekday(now, slot.weekday);
     if (offset === 0) return { weekday: slot.weekday, dateStr: today.date, names: today.leader || [] };
     if (offset == null) return null;
-    const cal = await getJx3DailyCalendar(offset);
+    const cal = await getJx3DailyCalendar(offset).catch(() => null);
     if (!cal?.leader?.length) return null;
     return { weekday: slot.weekday, dateStr: cal.date, names: cal.leader };
   }));
@@ -420,19 +421,29 @@ async function collectJx3WorldBossWeek(today: { date: string; leader?: string[] 
 }
 
 let lastMapEventsAt = 0;
+let mapEventsJob: Promise<void> | undefined;
 export async function refreshJx3MapEvents(force = false) {
-  if (!force && Date.now() - lastMapEventsAt < 15 * 60 * 1000 && (jx3YuncongEvents.value.length || jx3PifengEvents.value.length || jx3ChutianEvents.value.length)) {
+  if (mapEventsJob) return mapEventsJob;
+  if (!force && Date.now() - lastMapEventsAt < 15 * 60 * 1000) {
     return;
   }
-  const [yun, pi, chu] = await Promise.all([
-    getJx3Celebs('云从社'),
-    getJx3Celebs('披风会'),
-    getJx3Celebs('楚天社')
-  ]);
-  if (yun !== null) jx3YuncongEvents.value = filterJx3ZhueEvents(yun);
-  if (pi !== null) jx3PifengEvents.value = filterJx3ZhueEvents(pi);
-  if (chu !== null) jx3ChutianEvents.value = filterJx3ZhueEvents(chu);
-  lastMapEventsAt = Date.now();
+  const job = (async () => {
+    const [yun, pi, chu] = await Promise.all([
+      getJx3Celebs('云从社'),
+      getJx3Celebs('披风会'),
+      getJx3Celebs('楚天社'),
+    ]);
+    if (yun !== null) jx3YuncongEvents.value = filterJx3ZhueEvents(yun);
+    if (pi !== null) jx3PifengEvents.value = filterJx3ZhueEvents(pi);
+    if (chu !== null) jx3ChutianEvents.value = filterJx3ZhueEvents(chu);
+    if (yun !== null && pi !== null && chu !== null) lastMapEventsAt = Date.now();
+  })();
+  mapEventsJob = job;
+  try {
+    await job;
+  } finally {
+    if (mapEventsJob === job) mapEventsJob = undefined;
+  }
 }
 
 export const jx3ApiStatus = ref<'unknown' | 'ok' | 'fail'>('unknown');
@@ -441,67 +452,89 @@ export const jx3TodayCalendar = ref<Jx3DailyCalendar | null>(null);
 
 let lastDailySyncDate = '';
 let lastDailySyncAt = 0;
+let lastDailyAttemptAt = 0;
+let dailySyncJob: Promise<void> | undefined;
 
 // 同步 JX3API 真实日程。失败不改标题、不报连通。
-export async function syncJx3DailyCalendar(notify = false) {
-  const todayStr = formatJx3Date(new Date());
-  if (!notify && lastDailySyncDate === todayStr && Date.now() - lastDailySyncAt < 10 * 60 * 1000) {
-    return;
+export function syncJx3DailyCalendar(notify = false): Promise<void> {
+  if (dailySyncJob) return dailySyncJob;
+  const todayStr = beijingDay(new Date(Date.now() - 7 * 60 * 60_000));
+  if (!notify && jx3ApiStatus.value === 'ok' && lastDailySyncDate === todayStr && Date.now() - lastDailySyncAt < 15 * 60 * 1000) {
+    return Promise.resolve();
   }
-  try {
-    const daily = await getJx3DailyCalendar();
-    if (!daily?.war || !daily.mine || !daily.school) {
-      jx3ApiStatus.value = 'fail';
-      reportSource('jx3.calendar', '剑三日历', 'error', 'JX3API 未返回当日大战、矿车或门派');
-      if (notify) showToast('剑三日历同步失败', 'JX3API 未返回当日大战、矿车或门派');
-      return;
-    }
-    jx3ApiStatus.value = 'ok';
-    jx3TodayCalendar.value = daily;
-    reportSource('jx3.calendar', '剑三日历', 'ok');
-    lastDailySyncDate = todayStr;
-    lastDailySyncAt = Date.now();
-    const weekNames = await collectJx3WorldBossWeek(daily);
-    const leaderLine = weekNames.length ? weekNames.join('、') : (daily.leader || []).join('、');
-    const values: Record<Jx3CalendarSlotKey, string> = {
-      war: daily.war,
-      mine: daily.mine,
-      school: daily.school,
-      battle: daily.battle || '',
-      rescue: daily.rescue || '',
-      card: (daily.card || []).join('、'),
-      leader: leaderLine,
-      raid: (daily.weekly_raid || []).join('、'),
-      conn: (daily.weekly_conn || []).join('、')
-    };
-    const writes: Promise<void>[] = [];
-    for (const c of characterList.value.filter(ch => ch.game_id === 'jx3')) {
-      const list = allAccountTasks.value[c.id] || [];
-      for (const slot of JX3_CALENDAR_SLOTS) {
-        const value = values[slot.key];
-        const task = findJx3CalendarTask(list, slot.key, slot.mark);
-        if (!task) continue;
-        if (slot.key === 'leader' && !task.schedule_time) {
-          task.schedule_time = '每周三、周五 20:00 - 21:00';
-          writes.push(updateTaskScheduleTime(task.id, task.schedule_time, c.id));
-        }
-        if (!value && slot.key !== 'leader') continue;
-        const next = jx3CalendarSlotTitle(slot.label, value || '今日无', task.title);
-        if (task.title === next) continue;
-        task.title = next;
-        writes.push(updateTaskTitle(task.id, next, c.id));
+  if (!notify && lastDailyAttemptAt && Date.now() - lastDailyAttemptAt < 60_000) {
+    return Promise.resolve();
+  }
+  lastDailyAttemptAt = Date.now();
+  const job = (async () => {
+    let sourceLoaded = false;
+    try {
+      const daily = await getJx3DailyCalendar();
+      if (!daily || daily.date !== todayStr || !daily.war || !daily.mine || !daily.school) {
+        const reason = daily?.date && daily.date !== todayStr
+          ? `JX3API 返回 ${daily.date} 的日历，等待今日数据`
+          : 'JX3API 未返回当日大战、矿车或门派';
+        jx3ApiStatus.value = 'fail';
+        reportSource('jx3.calendar', '剑三日历', 'error', reason);
+        if (notify) showToast('剑三日历同步失败', reason);
+        return;
       }
+      sourceLoaded = true;
+      jx3ApiStatus.value = 'ok';
+      jx3TodayCalendar.value = daily;
+      reportSource('jx3.calendar', '剑三日历', 'ok');
+      lastDailySyncDate = todayStr;
+      lastDailySyncAt = Date.now();
+      const weekNames = await collectJx3WorldBossWeek(daily);
+      const leaderLine = weekNames.length ? weekNames.join('、') : (daily.leader || []).join('、');
+      const values: Record<Jx3CalendarSlotKey, string> = {
+        war: daily.war,
+        mine: daily.mine,
+        school: daily.school,
+        battle: daily.battle || '',
+        rescue: daily.rescue || '',
+        card: (daily.card || []).join('、'),
+        leader: leaderLine,
+        raid: (daily.weekly_raid || []).join('、'),
+        conn: (daily.weekly_conn || []).join('、')
+      };
+      const writes: Promise<void>[] = [];
+      for (const c of characterList.value.filter(ch => ch.game_id === 'jx3')) {
+        const list = allAccountTasks.value[c.id] || [];
+        for (const slot of JX3_CALENDAR_SLOTS) {
+          const value = values[slot.key];
+          const task = findJx3CalendarTask(list, slot.key, slot.mark);
+          if (!task) continue;
+          if (slot.key === 'leader' && !task.schedule_time) {
+            task.schedule_time = '每周三、周五 20:00 - 21:00';
+            writes.push(updateTaskScheduleTime(task.id, task.schedule_time, c.id));
+          }
+          if (!value && slot.key !== 'leader') continue;
+          const next = jx3CalendarSlotTitle(slot.label, value || '今日无', task.title);
+          if (task.title === next) continue;
+          task.title = next;
+          writes.push(updateTaskTitle(task.id, next, c.id));
+        }
+      }
+      if (writes.length) {
+        await Promise.all(writes);
+        syncActiveCharacterState();
+      }
+      if (notify) showToast('剑三日历已同步', `${daily.war} · ${daily.mine} · ${daily.school}`);
+    } catch (err) {
+      if (!sourceLoaded) {
+        jx3ApiStatus.value = 'fail';
+        reportSource('jx3.calendar', '剑三日历', 'error', err instanceof Error ? err.message : String(err));
+      }
+      if (notify) showToast(sourceLoaded ? '剑三日历已到，任务清单写入失败' : '剑三日历同步失败', String(err));
+      console.warn('Failed to sync JX3 daily:', err);
+    } finally {
+      void refreshJx3MapEvents();
     }
-    if (writes.length) {
-      await Promise.all(writes);
-      syncActiveCharacterState();
-    }
-    if (notify) showToast('剑三日历已同步', `${daily.war} · ${daily.mine} · ${daily.school}`);
-  } catch (err) {
-    jx3ApiStatus.value = 'fail';
-    reportSource('jx3.calendar', '剑三日历', 'error', err instanceof Error ? err.message : String(err));
-    if (notify) showToast('剑三日历同步失败', 'JX3API 未返回当日大战、矿车或门派');
-    console.warn('Failed to sync JX3 daily:', err);
-  }
-  void refreshJx3MapEvents();
+  })();
+  dailySyncJob = job;
+  void job.finally(() => {
+    if (dailySyncJob === job) dailySyncJob = undefined;
+  });
+  return job;
 }

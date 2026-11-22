@@ -2,8 +2,10 @@ import { ref, watch } from 'vue';
 import { isGameEnabled } from '../../services/games';
 import {
   applySkyBoostFeedback, fetchSkyBoostFeedback, loadSkyBoostBinding, supportsSkyBoostLink,
-  loadSkyBoostCompletion, saveSkyBoostCompletion, skyBoostDay, type SkyBoostFeedback,
+  loadSkyBoostCompletion, loadSkyBoostLatest,
+  saveSkyBoostCompletion, saveSkyBoostLatest, skyBoostExpired, type SkyBoostFeedback,
 } from '../../services/skyBoost';
+import { beijingDay } from '../../services/cycleReset';
 import { skyCharacters } from '../vault';
 import { dailyCharacterId, isSavingDaily, refreshDailyChecks } from './daily';
 import { skyDailyData, skyCalendarFeed } from './tabs';
@@ -38,6 +40,8 @@ export async function syncSkyBoost(manual = false) {
   const binding = loadSkyBoostBinding(characterId);
   if (!binding.link || (!manual && (!binding.autoSync || !supportsSkyBoostLink(binding.link)))) return;
   if (!manual && loadSkyBoostCompletion(characterId, binding)) return;
+  const latest = loadSkyBoostLatest(characterId, binding);
+  if (!manual && latest && skyBoostExpired(latest.feedback)) return;
   boostSyncing.value = true;
   isSavingDaily.value = true;
   try {
@@ -47,8 +51,14 @@ export async function syncSkyBoost(manual = false) {
       throw new Error('角色或订单设置已变更，本次反馈未写入');
     }
     const age = Date.now() - Date.parse(feedback.fetched_at);
-    if (feedback.day !== skyBoostDay() || !Number.isFinite(age) || age < -60_000 || age > 120_000) {
+    if (feedback.day !== beijingDay() || !Number.isFinite(age) || age < -60_000 || age > 120_000) {
       throw new Error('反馈日期不匹配，请重新同步');
+    }
+    if (skyBoostExpired(feedback)) {
+      const message = '订单已到期，自动查询已停止';
+      await saveSkyBoostLatest(characterId, binding, feedback, message);
+      boostResult.value = { characterId, feedback, message };
+      return;
     }
     let assetsMessage = '';
     if (feedback.assets) {
@@ -73,6 +83,7 @@ export async function syncSkyBoost(manual = false) {
           : '已按订单包含项目同步')
         : feedback.completed ? '今日日常未加载，请刷新后同步' : '尚未完成，本地勾选未改动'), assetsMessage].filter(Boolean).join('；');
     if (applied && !dailyMessage) await saveSkyBoostCompletion(characterId, binding, feedback, message);
+    if (!dailyMessage) await saveSkyBoostLatest(characterId, binding, feedback, message);
     boostResult.value = { characterId, feedback, message };
   } catch (e) {
     boostResult.value = { characterId, message: e instanceof Error ? e.message : String(e) };

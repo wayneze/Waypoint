@@ -55,15 +55,15 @@ fn jx3_strip_war_prefix(raw: &str) -> String {
 
 fn jx3_json_ok<'a>(json: &'a serde_json::Value, label: &str) -> Result<&'a serde_json::Value, String> {
     let code = json
-        .get("code")
+        .get("status")
         .and_then(|v| v.as_i64().or_else(|| v.as_str().and_then(|s| s.parse().ok())))
         .unwrap_or(0);
     if code != 200 {
-        let msg = json.get("msg").and_then(|v| v.as_str()).unwrap_or("unknown");
+        let msg = json.get("message").and_then(|v| v.as_str()).unwrap_or("unknown");
         return Err(format!("JX3API {} code {}: {}", label, code, msg));
     }
-    json.get("data")
-        .ok_or_else(|| format!("JX3API {} missing data", label))
+    json.get("detail")
+        .ok_or_else(|| format!("JX3API {} missing detail", label))
 }
 
 fn jx3_string_list(v: Option<&serde_json::Value>) -> Vec<String> {
@@ -377,9 +377,8 @@ mod tests {
     #[test]
     fn jx3_daily_calendar_parses_current_payload() {
         let json = serde_json::json!({
-            "code": 200,
-            "msg": "success",
-            "data": {
+            "status": 200,
+            "detail": {
                 "date": "2026-09-15",
                 "week": "二",
                 "war": "大战！英雄冰川宫宝库",
@@ -409,8 +408,8 @@ mod tests {
     #[test]
     fn jx3_daily_calendar_parses_friday_leader() {
         let json = serde_json::json!({
-            "code": 200,
-            "data": {
+            "status": 200,
+            "detail": {
                 "date": "2026-09-18",
                 "week": "五",
                 "war": "大战！英雄獭山岛",
@@ -426,9 +425,8 @@ mod tests {
     #[test]
     fn jx3_celebs_parses_yuncang_and_rejects_empty() {
         let json = serde_json::json!({
-            "code": 200,
-            "msg": "success",
-            "data": [
+            "status": 200,
+            "detail": [
                 {"map": "银霜口", "stage": "摸金倒斗", "site": "秦氏祖墓", "desc": "公共任务", "time": "09:01"},
                 {"map": "银霜口", "stage": "诛恶事件(限时刷新)", "site": "隐者客栈东北", "desc": "诛恶事件。", "time": "09:40"}
             ]
@@ -438,24 +436,24 @@ mod tests {
         assert_eq!(list[0].stage, "诛恶事件(限时刷新)");
         assert_eq!(list[0].time, "09:40");
         let ordinary = serde_json::json!({
-            "code": 200,
-            "data": [{"map": "河西瀚漠", "stage": "伏击吐蕃", "site": "那云寨西北", "desc": "协助轶漠军", "time": "11:26"}]
+            "status": 200,
+            "detail": [{"map": "河西瀚漠", "stage": "伏击吐蕃", "site": "那云寨西北", "desc": "协助轶漠军", "time": "11:26"}]
         });
         assert!(parse_jx3_celebs(&ordinary).unwrap().is_empty());
-        let empty = serde_json::json!({ "code": 200, "data": [] });
+        let empty = serde_json::json!({ "status": 200, "detail": [] });
         assert!(parse_jx3_celebs(&empty).is_err());
     }
     #[test]
     fn jx3_daily_calendar_rejects_dead_path_and_partial() {
         let dead = serde_json::json!({
-            "code": 404,
-            "msg": "请求的路径 [App.Data.Active_Calendar] 不存在",
-            "data": {}
+            "status": 404,
+            "message": "请求的路径 [App.Data.Active_Calendar] 不存在",
+            "detail": {}
         });
         assert!(parse_jx3_daily_calendar(&dead).is_err());
         let partial = serde_json::json!({
-            "code": 200,
-            "data": { "date": "2026-09-15", "war": "大战！英雄幽月轮" }
+            "status": 200,
+            "detail": { "date": "2026-09-15", "war": "大战！英雄幽月轮" }
         });
         assert!(parse_jx3_daily_calendar(&partial).is_err());
     }

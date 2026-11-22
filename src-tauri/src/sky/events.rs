@@ -616,7 +616,7 @@ pub async fn fetch_sky_events() -> Result<SkyEventCatalog, String> {
 
 async fn build_sky_events() -> Result<SkyEventCatalog, String> {
     let client = sky_http_client()?;
-    let today = chrono::Local::now().date_naive();
+    let today = super::beijing_today();
     let (ask_val, pack_val) = tokio::join!(
         wiki_ask(
             &client,

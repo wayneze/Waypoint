@@ -23,7 +23,7 @@ pub(crate) use extras::*;
 #[tauri::command]
 pub async fn fetch_sky_calendar() -> Result<SkyCalendarFeed, String> {
     let client = sky_http_client()?;
-    let today = chrono::Local::now().date_naive();
+    let today = super::beijing_today();
     let today_s = ymd(today);
     let cn_url = "https://wiki.biligame.com/sky/%E6%97%85%E8%A1%8C%E5%85%88%E7%A5%96%E5%9B%9E%E5%BD%92%E8%AE%B0%E5%BD%95";
     let intl_url = "https://wiki.biligame.com/sky/%E6%97%85%E8%A1%8C%E5%85%88%E7%A5%96%E5%9B%9E%E5%BD%92%E8%AE%B0%E5%BD%95_%E5%9B%BD%E9%99%85%E6%9C%8D";
@@ -336,7 +336,7 @@ pub async fn fetch_sky_event_edition(edition: SkyEventEdition) -> Result<SkyCale
         { return Err("来源页面已更新，已停止引用不一致的往届内容".into()); }
         let packs = packs_for_event_title(&group_event_packs(&packs?), &edition.title);
         let mut event = super::events::parse_event_page(&page, &edition.url, &wt, &edition.start,
-            &edition.end, chrono::Local::now().date_naive(), &packs);
+            &edition.end, super::beijing_today(), &packs);
         super::events::resolve_event_catalog_media(&client, std::slice::from_mut(&mut event)).await;
         let mut item = super::events::event_catalog_as_previews(&event);
         item.note = event.quests.clone();
@@ -359,7 +359,7 @@ pub async fn fetch_sky_event_edition(edition: SkyEventEdition) -> Result<SkyCale
     }
     let promo = parse_fandom_promo_file(&wt);
     let mut item = fandom_calendar_item(&page, &edition.title, start, end,
-        chrono::Local::now().date_naive(), promo.as_deref(), String::new(), "intl");
+        super::beijing_today(), promo.as_deref(), String::new(), "intl");
     item.previews = fandom_edition_previews(&wt, &parse_fandom_days_item_data(&catalog));
     attach_fandom_event_media(&mut item, &wt);
     let mut files = collect_fandom_media_files(std::slice::from_ref(&item));
@@ -501,12 +501,12 @@ pub(crate) async fn inspect_run(args: &[String]) -> Result<serde_json::Value, St
             Ok(inspect_feed_json(&feed, title.as_deref()))
         }
         "weibo" => {
-            let today = chrono::Local::now().date_naive();
+            let today = super::beijing_today();
             let items = fetch_cn_official_event_media(today).await;
             Ok(inspect_items_json("weibo", title.as_deref(), items))
         }
         "notices" => {
-            let today = chrono::Local::now().date_naive();
+            let today = super::beijing_today();
             let items = fetch_cn_official_notices(today).await;
             Ok(inspect_items_json("notices", title.as_deref(), items))
         }
@@ -527,7 +527,7 @@ pub(crate) async fn inspect_run(args: &[String]) -> Result<serde_json::Value, St
             Ok(inspect_items_json("dashen", title.as_deref(), items))
         }
         "extra" => {
-            let today = chrono::Local::now().date_naive();
+            let today = super::beijing_today();
             let (items, weibo_ids, weibo_timeline, history) = fetch_calendar_extra(today).await;
             let family = title
                 .as_deref()

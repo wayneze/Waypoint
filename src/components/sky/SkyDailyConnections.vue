@@ -2,9 +2,12 @@
 import { computed, ref, watch } from 'vue';
 import { ArrowUpRight, Gift, Link2, RefreshCw, ChevronDown, X } from '@lucide/vue';
 import { activeSkyCharacter, skyCharacters } from '../../workspace/vault';
-import { claimDailyLegacy, dailyCanEdit, dailyCharacterId, dailyLegacyCount, isSavingDaily } from '../../workspace/sky/daily';
+import { claimDailyLegacy, dailyCanEdit, dailyCharacterId, dailyLegacyCount, isSavingDaily, skyShard } from '../../workspace/sky/daily';
 import { boostResult, boostSyncing, syncSkyBoost } from '../../workspace/sky/boost';
-import { loadSkyBoostBinding, loadSkyBoostCompletion, saveSkyBoostBinding, SKY_BOOST_OPTIONS, supportsSkyBoostLink } from '../../services/skyBoost';
+import {
+  loadSkyBoostBinding, loadSkyBoostCompletion, loadSkyBoostLatest,
+  saveSkyBoostBinding, SKY_BOOST_OPTIONS, skyBoostExpired, supportsSkyBoostLink,
+} from '../../services/skyBoost';
 import { openExternalUrl } from '../../services/systemApi';
 import { showSkySettings, skyPlanDay } from '../../workspace/sky/plan';
 import { showToast } from '../../workspace/core';
@@ -18,19 +21,31 @@ const expanded = showSkySettings;
 const saving = ref(false);
 const error = ref('');
 const completedSync = computed(() => loadSkyBoostCompletion(dailyCharacterId.value, saved.value, skyPlanDay.value));
-const result = computed(() => boostResult.value?.characterId === dailyCharacterId.value ? boostResult.value : completedSync.value);
+const latestSync = computed(() => loadSkyBoostLatest(dailyCharacterId.value, saved.value));
+const result = computed(() => boostResult.value?.characterId === dailyCharacterId.value ? boostResult.value : latestSync.value || completedSync.value);
+const latestFeedback = computed(() => result.value?.feedback || latestSync.value?.feedback);
+const orderExpired = computed(() => {
+  void skyShard.value;
+  return !!latestFeedback.value && skyBoostExpired(latestFeedback.value);
+});
+const expiryLabel = computed(() => {
+  const feedback = latestFeedback.value;
+  if (!feedback?.expiration_date) return '';
+  return `${orderExpired.value ? '已到期' : '到期'} · ${feedback.expiration_date}`;
+});
 const includedLabel = computed(() => SKY_BOOST_OPTIONS.filter(o => saved.value.included[o.key]).map(o => o.label).join(' + '));
 const dirty = computed(() => JSON.stringify(draft.value) !== JSON.stringify(saved.value));
 const inventory = computed(() => loadSkyInventory(dailyCharacterId.value));
 const syncLabel = computed(() => {
   if (boostSyncing.value) return '同步中';
   if (!saved.value.link) return '连接代练';
+  if (orderExpired.value) return '订单已到期';
   if (result.value && !result.value.feedback) return '同步失败';
   if (!supportsSkyBoostLink(saved.value.link)) return '查看反馈';
   return completedSync.value ? '今日已同步' : saved.value.autoSync ? '自动同步' : '手动同步';
 });
 const syncTime = computed(() => {
-  const time = result.value?.feedback?.fetched_at || inventory.value?.outfitsAt || inventory.value?.balancesAt;
+  const time = latestFeedback.value?.fetched_at || inventory.value?.outfitsAt || inventory.value?.balancesAt;
   return time ? new Date(time).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }) : '';
 });
 watch(dailyCharacterId, () => {
@@ -86,6 +101,9 @@ async function save() {
         {{ syncLabel }}<time v-if="syncTime && saved.link">{{ syncTime }}</time>
         <ChevronDown class="w-3 h-3 transition-transform" :class="{ 'rotate-180': expanded }" />
       </button>
+      <span v-if="expiryLabel && saved.link" class="sky-order-expiry" :class="{ 'is-expired': orderExpired }">
+        {{ expiryLabel }}
+      </span>
       </div>
     </div>
     <p v-if="!skyCharacters.length" class="py-2 text-sm text-muted">先在账号金库添加光遇角色，再记录日常或绑定代练。</p>
@@ -97,7 +115,19 @@ async function save() {
       <div class="sky-sync-layout">
       <div class="sky-sync-summary">
       <p class="sky-sync-state" :class="{ 'is-complete': completedSync }">{{ completedSync ? '今日同步已完成' : '同步记录' }}</p>
-      <p v-if="completedSync && saved.autoSync" class="text-xs text-muted mt-1.5">今日不再自动请求，明日恢复检查；仍可手动刷新。</p>
+      <p v-if="orderExpired" class="text-xs text-muted mt-1.5">自动查询已停止。续期后可手动刷新。</p>
+      <p v-else-if="completedSync && saved.autoSync" class="text-xs text-muted mt-1.5">今日不再自动请求，明日恢复检查。</p>
+      <dl v-if="latestFeedback" class="mt-2 space-y-1 text-xs text-muted">
+        <div v-if="latestFeedback.days != null && latestFeedback.day === skyPlanDay && !orderExpired" class="flex gap-2">
+          <dt>剩余</dt><dd>{{ latestFeedback.days }} 天</dd>
+        </div>
+        <div v-if="latestFeedback.start_time" class="flex gap-2">
+          <dt>开始时间</dt><dd>{{ latestFeedback.start_time }}</dd>
+        </div>
+        <div v-if="latestFeedback.done_time && latestFeedback.day === skyPlanDay && !orderExpired" class="flex gap-2">
+          <dt>预计查收</dt><dd>{{ latestFeedback.done_time }}</dd>
+        </div>
+      </dl>
       <div v-if="dailyLegacyCount" class="py-3 text-sm flex flex-wrap items-center gap-2">
       <span class="text-muted">有旧的共享日常记录，选择所属角色后可合并。</span>
       <button type="button" class="wp-text-action" :disabled="!dailyCanEdit" @click="claimDailyLegacy">
@@ -140,7 +170,7 @@ async function save() {
           <label class="flex items-center gap-2 text-sm text-muted pt-2">
             <input v-model="draft.autoSync" type="checkbox" class="accent-beacon" />自动同步完成反馈
           </label>
-          <p class="text-xs text-faint">未完成时每 5 分钟检查；今日完成反馈保存成功后停止，次日自动恢复。</p>
+          <p class="text-xs text-faint">未完成时每 5 分钟检查；今日完成或订单到期后停止自动查询。</p>
         </fieldset>
         <p v-if="error" class="text-sm text-alert" role="alert">{{ error }}</p>
         <button type="submit" class="wp-game-action is-primary" :disabled="saving || boostSyncing || !dirty">{{ saving ? '保存中…' : '保存设置' }}</button>
@@ -168,6 +198,9 @@ async function save() {
 .sky-sync-summary { padding-right: 28px; border-right: 1px solid var(--color-hairline); }
 .sky-sync-state { font-size: 17px; font-weight: 600; color: var(--color-ink); }
 .sky-sync-state.is-complete { color: var(--color-done); }
+.sky-order-expiry { color: var(--color-muted); font-size: 11px; overflow-wrap: anywhere; }
+.sky-connection-actions { flex-wrap: wrap; }
+.sky-order-expiry.is-expired { color: var(--color-alert); }
 .sky-sync-form fieldset { min-width: 0; }
 @container (max-width: 720px) {
   .sky-sync-layout { grid-template-columns: minmax(0, 1fr); gap: 18px; }

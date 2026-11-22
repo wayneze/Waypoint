@@ -1,6 +1,7 @@
 // 光遇页子分组，以及各分组数据（档期、今日、季节、节日）的加载与刷新。
 import { ref, watch } from 'vue';
 import { type SkyDailyGuidePayload, loadTodaySkyDailyGuide, syncSkyDailyChecks } from '../../services/skyDailyService';
+import { beijingDay } from '../../services/cycleReset';
 import { type SkyCalendarFeed, getSkyCalendarFeed } from '../../services/skyCalendarService';
 import type { SkyEventCatalog, SkySeasonCatalog } from '../../services/skyApi';
 import { kvGet, kvSet } from '../../services/kv';
@@ -9,6 +10,7 @@ import { getSkyEventCatalog, loadEventWishStatus, mergeEventCatalog } from '../.
 import { showToast, state } from '../core';
 import { activeSkyCharacter } from '../vault';
 import { progressRevision } from '../../services/progress';
+import { sourceStatus } from '../../services/fetchCache';
 import { syncSkyInventoryCollection } from '../../services/skyInventory';
 
 // 收藏只有外观图鉴与先祖星盘两个入口；季节、节日是目录来源。
@@ -51,11 +53,8 @@ export function ensureSkySubTabCatalog(tab: SkySubTab): Promise<void> | void {
   if (tab === 'outfits' || tab === 'spirits') return Promise.all([refreshSkySeasons(false), refreshSkyEvents(false)]).then(() => {});
 }
 
-export function ensureSkyCatalogs() {
-  refreshSkyDaily(false);
-  refreshSkyNews(false);
-  refreshSkySeasons(false);
-  refreshSkyEvents(false);
+export async function ensureSkyCatalogs() {
+  await Promise.all([refreshSkyDaily(), refreshSkyNews(), refreshSkySeasons(), refreshSkyEvents()]);
 }
 
 // 光遇档期：当前季节 / 国服回归先祖 / 国际服已公告回归
@@ -90,22 +89,32 @@ export async function refreshSkyNews(force = false) {
 // 今日光遇日常图文导航响应式状态
 export const skyDailyData = ref<SkyDailyGuidePayload | null>(null);
 export const isLoadingSkyDaily = ref(false);
+let lastSkyDailyAttemptDay = '';
+let lastSkyDailyAttemptAt = 0;
 watch(() => activeSkyCharacter.value?.id || '', id => {
   if (skyDailyData.value) syncSkyDailyChecks(skyDailyData.value, id);
 }, { flush: 'sync' });
 
 export async function refreshSkyDaily(force = false) {
-  return runSkyRefresh(force ? 'daily:force' : 'daily', async () => {
+  const today = beijingDay();
+  if (skyRefreshJobs.daily) return skyRefreshJobs.daily;
+  if (!force && lastSkyDailyAttemptDay === today && Date.now() - lastSkyDailyAttemptAt < 5 * 60_000) return;
+  return runSkyRefresh('daily', async () => {
+    lastSkyDailyAttemptDay = today;
+    lastSkyDailyAttemptAt = Date.now();
     isLoadingSkyDaily.value = true;
     try {
       const data = await loadTodaySkyDailyGuide(force);
+      if (data.dateStr !== beijingDay()) return;
       syncSkyDailyChecks(data, activeSkyCharacter.value?.id || '');
       skyDailyData.value = data;
       if (force) {
-        showToast('今日日常已刷新', `${skyDailyData.value.dateStr} · 数据已更新`);
+        const status = sourceStatus['sky.daily'];
+        if (status.state === 'error' || status.state === 'stale') showToast('今日日常刷新失败', status.error);
+        else showToast('今日日常已刷新', status.error || data.dateStr);
       }
     } catch (e) {
-      showToast('刷新失败', '无法拉取今日任务数据');
+      if (force) showToast('刷新失败', '无法拉取今日任务数据');
     } finally {
       isLoadingSkyDaily.value = false;
     }

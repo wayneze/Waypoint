@@ -1,7 +1,15 @@
 /**
  * 游戏日/周切点：光遇 00:00，剑三 07:00，其余默认 00:00。
- * 只算本地墙上时钟，不调时区。
+ * 自定义重置规则按本地时钟计算。国服资料使用北京时间。
  */
+
+const beijingDate = new Intl.DateTimeFormat('en-CA', {
+  timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit',
+});
+
+export function beijingDay(now = new Date()): string {
+  return beijingDate.format(now);
+}
 
 export interface ResetClock {
   hour: number;

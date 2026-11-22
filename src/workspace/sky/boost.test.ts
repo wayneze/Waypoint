@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, expect, test, vi } from 'vitest';
 import type { SkyDailyGuidePayload } from '../../services/skyDailyService';
 import type { SkyBoostFeedback } from '../../services/skyBoost';
+import { beijingDay } from '../../services/cycleReset';
 
 const fetchFeedback = vi.hoisted(() => vi.fn());
 const invoke = vi.hoisted(() => vi.fn());
@@ -228,6 +229,38 @@ test('旧共享记录只在选定归属后合并；关闭自动同步仍可手�
   expect(fetchFeedback).toHaveBeenCalledOnce();
 });
 
+test('订单过期日已过时自动同步不再请求并持久停止；到期日当天仍可查询', async () => {
+  const { service, workspace, progress } = await setup();
+  const active = {
+    ...feedback, completed: false, status: '跑手正在号上代练',
+    days: 0, expiration_date: '2026-11-06',
+  };
+  expect(service.skyBoostExpired(active, new Date('2026-11-06T12:00:00+08:00'))).toBe(false);
+  expect(service.skyBoostExpired(active, new Date('2026-11-07T00:01:00+08:00'))).toBe(true);
+  expect(service.skyBoostExpired({ ...active, expiration_date: '2026-11-06 12:00:00' },
+    new Date('2026-11-06T12:00:00+08:00'))).toBe(true);
+  fetchFeedback.mockResolvedValue(active);
+  await workspace.syncSkyBoost();
+  expect(fetchFeedback).toHaveBeenCalledTimes(1);
+  await progress.hydrateProgress();
+  vi.setSystemTime(new Date('2026-11-07T00:01:00+08:00'));
+  await service.saveSkyBoostBinding('a', {
+    ...service.loadSkyBoostBinding('a'), included: { quests: false, candles: true, event: false },
+  });
+  await workspace.syncSkyBoost();
+  expect(fetchFeedback).toHaveBeenCalledTimes(1);
+  await workspace.syncSkyBoost(true);
+  expect(fetchFeedback).toHaveBeenCalledTimes(2);
+  fetchFeedback.mockResolvedValue({
+    ...active, expiration_date: '2026-11-20', days: 13,
+    fetched_at: new Date().toISOString(), day: beijingDay(),
+  });
+  await workspace.syncSkyBoost(true);
+  expect(service.loadSkyBoostLatest('a', service.loadSkyBoostBinding('a'))?.feedback.expiration_date).toBe('2026-11-20');
+  await workspace.syncSkyBoost();
+  expect(fetchFeedback).toHaveBeenCalledTimes(4);
+});
+
 test('首页与光遇共享多活动进度；缺攻略仍展示，促销不自动算日常，套餐不会完成周期目标', async () => {
   const { tabs, service, workspace, progress, core } = await setup();
   const row = (title: string, note: string) => ({
@@ -317,7 +350,7 @@ test('自动同步只在未完成时轮询，完成后跨重启停查；手动�
   vi.stubGlobal('document', documentStub);
   let completed = false;
   fetchFeedback.mockImplementation(async () => ({
-    ...feedback, completed, day: service.skyBoostDay(), fetched_at: new Date().toISOString(),
+    ...feedback, completed, day: beijingDay(), fetched_at: new Date().toISOString(),
   }));
   core.currentTab.value = 'daily';
   const stop = workspace.startSkyBoostSync();

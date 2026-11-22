@@ -13,6 +13,12 @@ mod boost;
 mod collection_media;
 pub use collection_media::resolve_sky_collection_media;
 
+pub(crate) fn beijing_today() -> chrono::NaiveDate {
+    chrono::Utc::now()
+        .with_timezone(&chrono::FixedOffset::east_opt(8 * 3600).unwrap())
+        .date_naive()
+}
+
 pub use calendar::{fetch_sky_calendar, fetch_sky_event_edition, inspect_main};
 pub use daily::{fetch_sky_daily_data, fetch_sky_quest_calendar};
 
@@ -127,6 +133,8 @@ pub struct SkyQuestCalendar {
     pub season_image: Option<String>,
     #[serde(rename = "eventImage")]
     pub event_image: Option<String>,
+    #[serde(rename = "shardImage")]
+    pub shard_image: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]

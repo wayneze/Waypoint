@@ -1,5 +1,6 @@
 import { invoke } from "@tauri-apps/api/core";
 import { isTauri } from "./api";
+import { beijingDay } from './cycleReset';
 
 export interface SkyDailyRawResult {
   success: boolean;
@@ -31,14 +32,7 @@ export interface SkyQuestCalendar {
   image?: string | null;
   seasonImage?: string | null;
   eventImage?: string | null;
-}
-
-function localDateStr(): string {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = String(now.getMonth() + 1).padStart(2, '0');
-  const d = String(now.getDate()).padStart(2, '0');
-  return `${y}-${m}-${d}`;
+  shardImage?: string | null;
 }
 
 function itemsFromCalendarJson(val: unknown, today: string): SkyQuestCalendarItem[] {
@@ -58,62 +52,36 @@ function itemsFromCalendarJson(val: unknown, today: string): SkyQuestCalendarIte
 function imageFromTypedJson(val: unknown, today: string): string | undefined {
   const v = val as { date?: string; tcurl?: string; image?: string } | null;
   if (!v || v.date !== today) return undefined;
-  const url = v.tcurl || v.image;
-  return url ? String(url) : undefined;
-}
-
-function normalizeQuestCalendar(data: unknown): SkyQuestCalendar | null {
-  if (!data) return null;
-  if (Array.isArray(data)) {
-    return data.length ? { items: data as SkyQuestCalendarItem[], image: null } : null;
-  }
-  const obj = data as SkyQuestCalendar;
-  return obj.items?.length ? obj : null;
+  const prefix = `https://api.qmkjcm.cn/gyapi/images/${today.replace(/-/g, '')}/`;
+  return [v.tcurl, v.image].find(url => typeof url === 'string' && url.startsWith(prefix));
 }
 
 async function fetchSkyQuestCalendarFromWeb(): Promise<SkyQuestCalendar | null> {
-  const today = localDateStr();
-  const stamp = today.replace(/-/g, '');
-  const [listVal, imgVal, seasonVal, eventVal] = await Promise.all([
+  const today = beijingDay();
+  const [listVal, imgVal, seasonVal, eventVal, shardVal] = await Promise.all([
     fetch('https://api.qmkjcm.cn/api/gy_mr_rw/').then(r => r.ok ? r.json() : null).catch(() => null),
     fetch('https://api.qmkjcm.cn/gyapi/rwt/mrrw/').then(r => r.ok ? r.json() : null).catch(() => null),
     fetch('https://api.qmkjcm.cn/gyapi/rwt/jlwz/').then(r => r.ok ? r.json() : null).catch(() => null),
-    fetch('https://api.qmkjcm.cn/gyapi/rwt/db/').then(r => r.ok ? r.json() : null).catch(() => null)
+    fetch('https://api.qmkjcm.cn/gyapi/rwt/db/').then(r => r.ok ? r.json() : null).catch(() => null),
+    fetch('https://api.qmkjcm.cn/gyapi/rwt/lsd/').then(r => r.ok ? r.json() : null).catch(() => null)
   ]);
   const items = itemsFromCalendarJson(listVal, today);
   if (!items.length) return null;
-  const image = imageFromTypedJson(imgVal, today)
-    || `https://api.qmkjcm.cn/gyapi/images/${stamp}/02.webp`;
-  const seasonImage = imageFromTypedJson(seasonVal, today)
-    || `https://api.qmkjcm.cn/gyapi/images/${stamp}/01.webp`;
+  const image = imageFromTypedJson(imgVal, today);
+  const seasonImage = imageFromTypedJson(seasonVal, today);
   const eventImage = imageFromTypedJson(eventVal, today);
-  return { items, image, seasonImage, eventImage };
+  return { items, image, seasonImage, eventImage, shardImage: imageFromTypedJson(shardVal, today) };
 }
 
 export async function fetchSkyQuestCalendar(): Promise<SkyQuestCalendar | null> {
-  let cal: SkyQuestCalendar | null = null;
   if (isTauri()) {
     try {
-      cal = normalizeQuestCalendar(await invoke<unknown>("fetch_sky_quest_calendar"));
+      return await invoke<SkyQuestCalendar>("fetch_sky_quest_calendar");
     } catch (e) {
       console.warn("Backend fetch_sky_quest_calendar failed:", e);
     }
   }
-  if (cal?.items.length && cal.image && cal.seasonImage && cal.eventImage) return cal;
-  try {
-    const web = await fetchSkyQuestCalendarFromWeb();
-    if (!web) return cal;
-    if (!cal) return web;
-    return {
-      items: cal.items,
-      image: cal.image || web.image,
-      seasonImage: cal.seasonImage || web.seasonImage,
-      eventImage: cal.eventImage || web.eventImage
-    };
-  } catch (e) {
-    console.warn("Quest calendar web fetch failed:", e);
-    return cal;
-  }
+  return fetchSkyQuestCalendarFromWeb();
 }
 
 function invokeWithTimeout<T>(cmd: string, ms: number, args?: Record<string, unknown>): Promise<T> {

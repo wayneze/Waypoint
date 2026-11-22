@@ -6,7 +6,8 @@
 
 import { fetchSkyDailyFromBackend, fetchSkyQuestCalendar, type SkyQuestCalendar } from './skyApi';
 import { cnSeasonalCandleRealm, parseSkyDailyPost, questFromCalendarText, type ParsedEventDaily } from './skyDailyLexicon';
-import { cacheFromThisBuild, cacheGet, cacheSet, reportSource } from './fetchCache';
+import { cacheFromThisBuild, cacheGet, cacheSet, reportSource, sourceStatus } from './fetchCache';
+import { beijingDay } from './cycleReset';
 import { dailyChecked, setCharacterDailyChecks } from './progress';
 
 export interface SkyDailyQuestItem {
@@ -70,10 +71,6 @@ export interface SkyDailyGuidePayload {
   parseNote?: string;
 }
 
-export function getTodayDateStr(): string {
-  return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-}
-
 export function getTodayDayOfWeek(): string {
   return new Intl.DateTimeFormat('zh-CN', { timeZone: 'Asia/Shanghai', weekday: 'long' }).format(new Date());
 }
@@ -113,62 +110,50 @@ function emptyPayload(todayStr: string, note: string): SkyDailyGuidePayload {
 }
 
 export async function loadTodaySkyDailyGuide(force = false): Promise<SkyDailyGuidePayload> {
-  const todayStr = getTodayDateStr();
+  const todayStr = beijingDay();
   const cacheKey = `${CACHE_KEY_PREFIX}${todayStr}`;
-
-  if (!force) {
-    const cached = cacheGet<SkyDailyGuidePayload>(cacheKey);
-    const parsed = cached?.data;
-    if (parsed && cacheFromThisBuild(cacheKey) && parsed.dateStr === todayStr && !parsed.isFallback) {
-      reportSource('sky.daily', '光遇今日任务', 'ok', '', cached.fetchedAt);
-      return parsed;
+  const entry = cacheFromThisBuild(cacheKey) ? cacheGet<SkyDailyGuidePayload>(cacheKey) : null;
+  const cached = entry?.data.dateStr === todayStr ? entry.data : undefined;
+  if (!force && cached && Date.now() - cached.fetchedAt < (cached.parseNote ? 5 : 15) * 60_000) {
+    if (!sourceStatus['sky.daily']) {
+      reportSource('sky.daily', '光遇今日任务', cached.parseNote ? 'partial' : 'ok', cached.parseNote, cached.fetchedAt);
     }
+    return cached;
   }
 
-  const [backendResult, calendar] = await Promise.all([
-    fetchSkyDailyFromBackend().catch(err => {
-      console.warn('Backend weibo fetch failed:', err);
-      return null;
-    }),
-    fetchSkyQuestCalendar().catch(err => {
-      console.warn('Quest calendar fetch failed:', err);
-      return null;
-    })
-  ]);
-
-  const hasWeibo = !!(backendResult && backendResult.success && (backendResult.post_text || backendResult.all_images?.length));
-  if (hasWeibo || calendar?.items.length) {
+  const [post, questCalendar] = await Promise.all([fetchSkyDailyFromBackend(), fetchSkyQuestCalendar()]);
+  const weibo = post?.success && post.date_str === todayStr ? post : null;
+  const calendar = questCalendar?.items.every(item => item.date === todayStr) ? questCalendar : null;
+  if (weibo || calendar?.items.length) {
     const payload = buildPayloadFromBackend(
-      hasWeibo ? backendResult! : {
-        date_str: todayStr,
-        post_text: '',
-        all_images: []
-      },
-      todayStr,
-      calendar
+      weibo || { post_text: '', all_images: [] }, todayStr, calendar
     );
+    const missing = [!weibo && '微博当天图文未发布或暂不可用', payload.parseNote].filter(Boolean).join('；');
+    payload.parseNote = missing || undefined;
+    if (!weibo && cached?.sourcePostText) {
+      reportSource('sky.daily', '光遇今日任务', 'stale', '微博暂不可用，已保留今天的图文', cached.fetchedAt);
+      return cached;
+    }
     cacheSet(cacheKey, payload);
-    reportSource('sky.daily', '光遇今日任务', hasWeibo ? 'ok' : 'stale', hasWeibo ? '' : '微博没拉到，季蜡地图按日轮推算', Date.now());
+    reportSource('sky.daily', '光遇今日任务', missing ? 'partial' : 'ok', missing, payload.fetchedAt);
     return payload;
   }
 
+  if (cached) {
+    reportSource('sky.daily', '光遇今日任务', 'stale', '今日任务日历和微博暂不可用', cached.fetchedAt);
+    return cached;
+  }
   reportSource('sky.daily', '光遇今日任务', 'error', '今日任务日历和微博都没拉到');
 
   return emptyPayload(todayStr, '未能拉到今日任务日历，微博也没有博文。任务与地图不会沿用旧日文案。');
 }
 
-function pickImage(
-  images: string[],
-  hint: number | undefined,
-  fallbackIndex: number
-): string {
-  if (hint != null && images[hint]) return images[hint];
-  return images[fallbackIndex] || images[0] || '';
+function pickImage(images: string[], hint: number | undefined): string {
+  return hint == null ? '' : images[hint] || '';
 }
 
 function buildPayloadFromBackend(
   raw: {
-    date_str: string;
     post_text: string;
     all_images: string[];
   },
@@ -177,14 +162,13 @@ function buildPayloadFromBackend(
 ): SkyDailyGuidePayload {
   const parsed = parseSkyDailyPost(raw.post_text || '');
   const images = raw.all_images || [];
-  const seasonImg = calendar?.seasonImage
-    || pickImage(images, parsed.imageHints.seasonCandle, 0);
-  const weiboQuestsImg = pickImage(images, parsed.imageHints.quests, 1);
-  const shardImg = pickImage(images, parsed.imageHints.shard, 3);
+  const seasonImg = calendar?.seasonImage || pickImage(images, parsed.imageHints.seasonCandle);
+  const weiboQuestsImg = pickImage(images, parsed.imageHints.quests);
+  const shardImg = calendar?.shardImage || pickImage(images, parsed.imageHints.shard);
   // 活动代币图只认正文明说"代币"的那张。兑换树、复刻先祖动作展示不是代币位置，没有就不显示
   const tokenImg = calendar?.eventImage
     || (parsed.imageHints.token != null ? images[parsed.imageHints.token] || '' : '');
-  const questsImg = weiboQuestsImg || calendar?.image || '';
+  const questsImg = calendar?.image || weiboQuestsImg;
 
   const calendarItems = calendar && calendar.items.length ? calendar.items : null;
   const quests: SkyDailyQuestItem[] = calendarItems

@@ -281,15 +281,11 @@ function parseCandleGroup(
 
 function parseImageHints(text: string): ParsedSkyDailyPost['imageHints'] {
   const imageHints: ParsedSkyDailyPost['imageHints'] = {};
+  const captions = [...text.matchAll(/图\s*(\d+)\s*[-—–:：·.]\s*([^\n]+)/g)];
   for (const role of LEX.imageRoles) {
-    for (const k of role.any) {
-      const re = new RegExp(`图\\s*(\\d)\\s*[-—–:：·.\\s]*[^\\n]{0,8}${k}`);
-      const m = text.match(re);
-      if (m) {
-        imageHints[role.role] = Math.max(0, parseInt(m[1], 10) - 1);
-        break;
-      }
-    }
+    const caption = captions.find(([, , value]) =>
+      role.any.some(keyword => value.includes(keyword)));
+    if (caption) imageHints[role.role] = Math.max(0, Number(caption[1]) - 1);
   }
   return imageHints;
 }
